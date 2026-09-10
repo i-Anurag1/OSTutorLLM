@@ -1,0 +1,8 @@
+[
+ {"id":"easy-01","difficulty":"easy","question":"What is paging?","gold_concepts":["pages","frames","virtual memory"]},
+ {"id":"easy-02","difficulty":"easy","question":"What is a system call?","gold_concepts":["user","kernel","interface"]},
+ {"id":"medium-01","difficulty":"medium","question":"Compare FCFS and Round Robin scheduling.","gold_concepts":["arrival order","time quantum","waiting"]},
+ {"id":"medium-02","difficulty":"medium","question":"Explain LRU page replacement.","gold_concepts":["least recently used","page fault","frame"]},
+ {"id":"hard-01","difficulty":"hard","question":"How does Banker's algorithm determine a safe state?","gold_concepts":["need","work","finish","safe sequence"]},
+ {"id":"hard-02","difficulty":"hard","question":"Explain the four necessary conditions for deadlock.","gold_concepts":["mutual exclusion","hold and wait","no preemption","circular wait"]}
+]

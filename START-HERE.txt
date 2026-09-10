@@ -1,0 +1,12 @@
+OSTutorLLM 3.0 - START HERE
+
+1. Install Docker Desktop.
+2. Open PowerShell in this folder.
+3. Run: docker compose up --build
+4. Open: http://localhost:3000
+5. Login: student@ostutor.local / Student123!
+6. Test Overview -> AI Tutor -> Simulators -> Quiz Lab -> Code Labs -> Analytics.
+7. Faculty/Admin accounts are included for source-management testing.
+
+No upload step is required. The source corpus is bundled and indexed automatically.
+No LLM API key is required for the default local-grounded tutor.
