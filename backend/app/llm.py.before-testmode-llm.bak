@@ -1,0 +1,37 @@
+import httpx,json,re,time
+from .config import settings
+
+async def generate(messages,temperature=0.2,response_format=None):
+    if not settings.llm_base_url:
+        return None,0.0
+    url=settings.llm_base_url.rstrip('/')+'/chat/completions'; headers={'Content-Type':'application/json'}
+    if settings.llm_api_key: headers['Authorization']='Bearer '+settings.llm_api_key
+    body={'model':settings.llm_model,'messages':messages,'temperature':temperature,'max_tokens':1800}
+    if response_format: body['response_format']=response_format
+    t=time.perf_counter()
+    try:
+        async with httpx.AsyncClient(timeout=180) as client:
+            r=await client.post(url,json=body,headers=headers); r.raise_for_status(); data=r.json()
+        return data['choices'][0]['message']['content'],round((time.perf_counter()-t)*1000,2)
+    except (httpx.HTTPError, KeyError, IndexError, ValueError):
+        return None,round((time.perf_counter()-t)*1000,2)
+
+def grounded_validate(answer,citations,evidence=None):
+    used=set(re.findall(r'\[S(\d+)\]',answer)); ids={c['id'][1:] for c in citations}
+    if not citations or not used or not used.issubset(ids): return False
+    if not evidence: return True
+    sentences=re.split(r'(?<=[.!?])\s+',answer)
+    for sentence in sentences:
+        refs=set(re.findall(r'\[S(\d+)\]',sentence))
+        if not refs: continue
+        words=set(re.findall(r'\b[a-zA-Z]{4,}\b',sentence.lower()))-{'source','sources','according'}
+        if not words: continue
+        supported=False
+        for ref in refs:
+            idx=int(ref)-1
+            if 0 <= idx < len(evidence):
+                src=set(re.findall(r'\b[a-zA-Z]{4,}\b',evidence[idx]['text'].lower()))
+                if len(words & src)/len(words) >= 0.12:
+                    supported=True; break
+        if not supported: return False
+    return True

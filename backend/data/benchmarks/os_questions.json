@@ -1,0 +1,110 @@
+[
+  {
+    "id": "os01",
+    "question": "What is paging and how does it use pages and frames?",
+    "difficulty": "easy",
+    "gold_concepts": [
+      "paging",
+      "pages",
+      "frames"
+    ],
+    "gold_sources": [
+      "06_memory_management.md",
+      "08_segmentation.md"
+    ]
+  },
+  {
+    "id": "os02",
+    "question": "Compare FCFS and Round Robin process scheduling.",
+    "difficulty": "medium",
+    "gold_concepts": [
+      "FCFS",
+      "Round Robin",
+      "time quantum",
+      "waiting time"
+    ],
+    "gold_sources": [
+      "02_process_scheduling.md"
+    ]
+  },
+  {
+    "id": "os03",
+    "question": "Explain the four necessary conditions for deadlock.",
+    "difficulty": "medium",
+    "gold_concepts": [
+      "mutual exclusion",
+      "hold and wait",
+      "no preemption",
+      "circular wait"
+    ],
+    "gold_sources": [
+      "05_deadlocks.md"
+    ]
+  },
+  {
+    "id": "os04",
+    "question": "How does LRU page replacement work?",
+    "difficulty": "medium",
+    "gold_concepts": [
+      "LRU",
+      "page replacement",
+      "page fault"
+    ],
+    "gold_sources": [
+      "07_page_replacement.md"
+    ]
+  },
+  {
+    "id": "os05",
+    "question": "What is a system call and why is it used?",
+    "difficulty": "easy",
+    "gold_concepts": [
+      "system call",
+      "kernel",
+      "user"
+    ],
+    "gold_sources": [
+      "12_system_calls.md"
+    ]
+  },
+  {
+    "id": "os06",
+    "question": "What is the purpose of the Linux shell and common shell commands?",
+    "difficulty": "easy",
+    "gold_concepts": [
+      "shell",
+      "Linux",
+      "command"
+    ],
+    "gold_sources": [
+      "11_linux_shell.md"
+    ]
+  },
+  {
+    "id": "os07",
+    "question": "Explain Bankers algorithm and a safe state.",
+    "difficulty": "hard",
+    "gold_concepts": [
+      "Banker",
+      "safe state",
+      "resource",
+      "deadlock"
+    ],
+    "gold_sources": [
+      "05_deadlocks.md"
+    ]
+  },
+  {
+    "id": "os08",
+    "question": "What is virtual memory and why are page faults important?",
+    "difficulty": "medium",
+    "gold_concepts": [
+      "virtual memory",
+      "page fault",
+      "demand paging"
+    ],
+    "gold_sources": [
+      "13_virtual_memory.md"
+    ]
+  }
+]

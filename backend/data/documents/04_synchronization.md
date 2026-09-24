@@ -1,0 +1,2 @@
+# Synchronization and Concurrency
+Critical sections protect shared state. Mutual exclusion prevents more than one execution context from entering a critical section at the same time. Semaphores provide synchronization primitives. Producer-consumer uses a bounded buffer and coordinates producers and consumers with synchronization over empty slots, full slots, and mutual exclusion. Dining Philosophers illustrates contention for shared resources.

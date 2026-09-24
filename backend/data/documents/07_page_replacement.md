@@ -1,0 +1,2 @@
+# Page Replacement
+When a page fault occurs and all frames are occupied, the operating system chooses a victim page. FIFO replaces the page that entered memory first. LRU replaces the page that has not been used for the longest time. Optimal replaces the page whose next reference is farthest in the future and is a theoretical lower-bound strategy. Page replacement is evaluated using hits, faults, and fault rate.

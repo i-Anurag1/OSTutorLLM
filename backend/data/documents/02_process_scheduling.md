@@ -1,0 +1,2 @@
+# Process Management and Scheduling
+A process is a program in execution. Process states commonly include new, ready, running, blocked, and terminated. FCFS schedules by arrival order. SJF selects the shortest available burst. SRTF is the preemptive form of SJF. Round Robin gives each ready process a fixed time quantum. Priority scheduling selects the highest-priority ready process. Common metrics are waiting time, turnaround time, response time, and throughput.

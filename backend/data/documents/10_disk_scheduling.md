@@ -1,0 +1,2 @@
+# Disk Scheduling
+Disk scheduling orders pending I/O requests to reduce head movement or improve service behavior. FCFS follows request order. SSTF selects the closest pending request. SCAN moves in one direction while servicing requests before reversing. C-SCAN services one direction and wraps to the opposite end. LOOK and C-LOOK are variants that stop at the last request instead of moving to the physical boundary.

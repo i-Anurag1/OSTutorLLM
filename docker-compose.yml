@@ -1,0 +1,86 @@
+﻿services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ostutor}
+      POSTGRES_USER: ${POSTGRES_USER:-ostutor}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ostutor}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U ${POSTGRES_USER:-ostutor} -d ${POSTGRES_DB:-ostutor}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD","redis-cli","ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  api:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-ostutor}:${POSTGRES_PASSWORD:-ostutor}@db:5432/${POSTGRES_DB:-ostutor}
+      REDIS_URL: redis://redis:6379/0
+      LLM_BASE_URL: ${LLM_BASE_URL:-http://host.docker.internal:11434/v1}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: qwen3:8b
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-BAAI/bge-large-en-v1.5}
+      RERANKER_MODEL: ${RERANKER_MODEL:-BAAI/bge-reranker-base}
+      RAG_DENSE_K: ${RAG_DENSE_K:-24}
+      RAG_SPARSE_K: ${RAG_SPARSE_K:-24}
+      RAG_RERANK_K: ${RAG_RERANK_K:-12}
+      CACHE_TTL_SECONDS: ${CACHE_TTL_SECONDS:-900}
+      HF_HOME: /root/.cache/huggingface
+    command: ["sh","-c","uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+    ports: ["8000:8000"]
+    volumes:
+      - ./backend/data:/app/data
+      - hf_cache:/root/.cache/huggingface
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    healthcheck:
+      test: ["CMD","python","-c","import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  worker:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-ostutor}:${POSTGRES_PASSWORD:-ostutor}@db:5432/${POSTGRES_DB:-ostutor}
+      REDIS_URL: redis://redis:6379/0
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-BAAI/bge-large-en-v1.5}
+      RERANKER_MODEL: ${RERANKER_MODEL:-BAAI/bge-reranker-base}
+      HF_HOME: /root/.cache/huggingface
+    command: ["python","-m","app.worker"]
+    volumes:
+      - ./backend/data:/app/data
+      - hf_cache:/root/.cache/huggingface
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_healthy}
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    ports: ["3000:3000"]
+    depends_on:
+      api: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD-SHELL","wget -q -O - http://localhost:3000 >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+volumes:
+  pgdata:
+  hf_cache:
+
