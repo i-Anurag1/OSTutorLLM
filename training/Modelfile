@@ -1,0 +1,17 @@
+FROM ./ostutor-qwen3-q4_k_m.gguf
+PARAMETER temperature 0.2
+PARAMETER num_ctx 4096
+PARAMETER stop "<|im_end|>"
+TEMPLATE """{{- range $i, $_ := .Messages }}
+{{- $last := eq (len (slice $.Messages $i)) 1 -}}
+<|im_start|>{{ .Role }}
+{{ .Content }}{{ if not $last }}<|im_end|>
+{{ end }}
+{{- if and $last (ne .Role "assistant") }}<|im_end|>
+<|im_start|>assistant
+<think>
+
+</think>
+
+{{ end }}
+{{- end }}"""

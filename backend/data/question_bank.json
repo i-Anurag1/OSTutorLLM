@@ -1,0 +1,942 @@
+[
+ {
+  "topic": "Foundations",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "What does the CPU mode bit indicate?",
+  "options": [
+   "The current privilege mode, user or kernel",
+   "The number of running processes",
+   "Whether the cache is enabled",
+   "The size of the page table"
+  ],
+  "answer": "A",
+  "explanation": "The mode bit records whether the CPU is executing in user mode or kernel mode."
+ },
+ {
+  "topic": "Foundations",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "Which kernel design runs file systems and drivers as user-space servers?",
+  "options": [
+   "Monolithic kernel",
+   "Microkernel",
+   "Batch system",
+   "Real-time system"
+  ],
+  "answer": "B",
+  "explanation": "A microkernel keeps only the essentials in the kernel and moves services to user space."
+ },
+ {
+  "topic": "Foundations",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "Which event is synchronous and caused by the executing instruction?",
+  "options": [
+   "A timer interrupt",
+   "A disk completion interrupt",
+   "A trap such as divide by zero",
+   "A key press interrupt"
+  ],
+  "answer": "C",
+  "explanation": "Traps and exceptions are caused by the current instruction; interrupts come asynchronously from hardware."
+ },
+ {
+  "topic": "Process Scheduling",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "Which algorithm can suffer from the convoy effect?",
+  "options": [
+   "Round Robin",
+   "SRTF",
+   "Multilevel feedback queue",
+   "FCFS"
+  ],
+  "answer": "D",
+  "explanation": "Short processes wait behind one long CPU-bound process under FCFS."
+ },
+ {
+  "topic": "Process Scheduling",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "How is waiting time defined?",
+  "options": [
+   "Turnaround time minus burst time",
+   "Completion time minus arrival time",
+   "First run time minus arrival time",
+   "Burst time minus quantum"
+  ],
+  "answer": "A",
+  "explanation": "Waiting time is the time spent in the ready queue: turnaround minus burst."
+ },
+ {
+  "topic": "Process Scheduling",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "Which technique prevents starvation in priority scheduling?",
+  "options": [
+   "A larger quantum",
+   "Aging",
+   "Spooling",
+   "Swapping"
+  ],
+  "answer": "B",
+  "explanation": "Aging gradually raises the priority of processes that have waited a long time."
+ },
+ {
+  "topic": "Process Scheduling",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "Bursts 24, 3 and 3 arrive together in that order. What is the average FCFS waiting time?",
+  "options": [
+   "3",
+   "10",
+   "17",
+   "30"
+  ],
+  "answer": "C",
+  "explanation": "Waiting times are 0, 24 and 27, so the average is 51 / 3 = 17."
+ },
+ {
+  "topic": "Threads",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "Which resource is NOT shared between threads of the same process?",
+  "options": [
+   "The heap",
+   "Open files",
+   "The code segment",
+   "The stack"
+  ],
+  "answer": "D",
+  "explanation": "Each thread has its own stack and registers; code, heap and files are shared."
+ },
+ {
+  "topic": "Threads",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "What does fork return in the child process?",
+  "options": [
+   "0",
+   "The child's process ID",
+   "-1",
+   "The parent's process ID"
+  ],
+  "answer": "A",
+  "explanation": "fork returns 0 in the child and the child's PID in the parent."
+ },
+ {
+  "topic": "Threads",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "What is a child that has exited but has not been waited for?",
+  "options": [
+   "An orphan process",
+   "A zombie process",
+   "A daemon",
+   "An idle process"
+  ],
+  "answer": "B",
+  "explanation": "The kernel keeps the exit status until the parent calls wait, leaving a zombie entry."
+ },
+ {
+  "topic": "Synchronization",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "Which is NOT a requirement of a critical-section solution?",
+  "options": [
+   "Mutual exclusion",
+   "Progress",
+   "Fastest possible execution",
+   "Bounded waiting"
+  ],
+  "answer": "C",
+  "explanation": "The three requirements are mutual exclusion, progress and bounded waiting."
+ },
+ {
+  "topic": "Synchronization",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "What initial value suits a counting semaphore guarding 5 identical resources?",
+  "options": [
+   "0",
+   "1",
+   "10",
+   "5"
+  ],
+  "answer": "D",
+  "explanation": "A counting semaphore starts at the number of available resources."
+ },
+ {
+  "topic": "Synchronization",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "Spinlocks are best suited to which situation?",
+  "options": [
+   "Very short critical sections on a multiprocessor",
+   "Long critical sections on a uniprocessor",
+   "Waiting for disk I/O",
+   "Preventing deadlock"
+  ],
+  "answer": "A",
+  "explanation": "Busy waiting wastes CPU, so it only pays off when the lock is held very briefly."
+ },
+ {
+  "topic": "Producer-Consumer",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "In the semaphore bounded-buffer solution, what is the semaphore empty initialised to?",
+  "options": [
+   "0",
+   "N, the buffer size",
+   "1",
+   "N - 1"
+  ],
+  "answer": "B",
+  "explanation": "empty counts free slots, which is N at the start; full starts at 0."
+ },
+ {
+  "topic": "Producer-Consumer",
+  "difficulty": "hard",
+  "kind": "mcq",
+  "prompt": "What can happen if the producer takes the mutex before wait(empty) when the buffer is full?",
+  "options": [
+   "Nothing",
+   "The buffer grows",
+   "Deadlock",
+   "The consumer runs faster"
+  ],
+  "answer": "C",
+  "explanation": "The producer sleeps holding the mutex, so the consumer can never enter to free a slot."
+ },
+ {
+  "topic": "Producer-Consumer",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "Which semaphore counts the filled slots?",
+  "options": [
+   "mutex",
+   "empty",
+   "turn",
+   "full"
+  ],
+  "answer": "D",
+  "explanation": "full counts items available to the consumer."
+ },
+ {
+  "topic": "Dining Philosophers",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "What causes deadlock in the naive solution?",
+  "options": [
+   "Every philosopher holds the left fork and waits for the right one",
+   "Too many forks",
+   "Philosophers eating for too long",
+   "Priority inversion"
+  ],
+  "answer": "A",
+  "explanation": "This produces a circular wait among all five philosophers."
+ },
+ {
+  "topic": "Dining Philosophers",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "Which strategy breaks circular wait by numbering the forks?",
+  "options": [
+   "Timeouts",
+   "Resource ordering",
+   "Random back-off",
+   "A larger table"
+  ],
+  "answer": "B",
+  "explanation": "Always taking the lower-numbered fork first prevents a cycle of waiting."
+ },
+ {
+  "topic": "Dining Philosophers",
+  "difficulty": "hard",
+  "kind": "mcq",
+  "prompt": "Seating at most n-1 philosophers guarantees what?",
+  "options": [
+   "Everyone eats at once",
+   "No philosopher can ever starve",
+   "At least one philosopher can always get both forks",
+   "Fewer forks are required"
+  ],
+  "answer": "C",
+  "explanation": "With n-1 seated and n forks, the pigeonhole principle leaves a pair of forks for someone."
+ },
+ {
+  "topic": "Deadlocks",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "Which is NOT a Coffman condition?",
+  "options": [
+   "Mutual exclusion",
+   "Hold and wait",
+   "Circular wait",
+   "Preemption"
+  ],
+  "answer": "D",
+  "explanation": "The condition is no preemption; allowing preemption would break it."
+ },
+ {
+  "topic": "Deadlocks",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "With single-instance resources, what does a cycle in the resource allocation graph mean?",
+  "options": [
+   "Deadlock",
+   "A safe state",
+   "Only starvation",
+   "Nothing"
+  ],
+  "answer": "A",
+  "explanation": "For single instances a cycle is both necessary and sufficient for deadlock."
+ },
+ {
+  "topic": "Deadlocks",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "Which prevention technique is the most practical?",
+  "options": [
+   "Removing mutual exclusion",
+   "Imposing a total order on resource requests",
+   "Preempting every resource",
+   "Banning multiprogramming"
+  ],
+  "answer": "B",
+  "explanation": "Resource ordering breaks circular wait without hurting utilisation much."
+ },
+ {
+  "topic": "Banker's Algorithm",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "How is the Need matrix computed?",
+  "options": [
+   "Allocation minus Max",
+   "Available minus Max",
+   "Max minus Allocation",
+   "Max plus Allocation"
+  ],
+  "answer": "C",
+  "explanation": "Need is what a process may still request: Max - Allocation."
+ },
+ {
+  "topic": "Banker's Algorithm",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "When is a state safe?",
+  "options": [
+   "No process is waiting",
+   "Available is zero",
+   "Every process holds a resource",
+   "A safe sequence exists in which every process can finish"
+  ],
+  "answer": "D",
+  "explanation": "Safety means some order lets all processes obtain their remaining needs and finish."
+ },
+ {
+  "topic": "Banker's Algorithm",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "Is an unsafe state always a deadlock?",
+  "options": [
+   "No, it only may lead to deadlock",
+   "Yes, always",
+   "Only with one resource type",
+   "Only with five processes"
+  ],
+  "answer": "A",
+  "explanation": "Unsafe means deadlock is possible, so the Banker refuses requests that lead there."
+ },
+ {
+  "topic": "Memory Management",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "Which fragmentation remains in a paging system?",
+  "options": [
+   "External fragmentation",
+   "Internal fragmentation in the last page",
+   "None at all",
+   "TLB fragmentation"
+  ],
+  "answer": "B",
+  "explanation": "Fixed-size pages remove external fragmentation but waste space in the last page."
+ },
+ {
+  "topic": "Memory Management",
+  "difficulty": "hard",
+  "kind": "mcq",
+  "prompt": "With TLB hit ratio 0.8, TLB lookup 20 ns and memory access 100 ns, what is the effective access time?",
+  "options": [
+   "120 ns",
+   "100 ns",
+   "140 ns",
+   "160 ns"
+  ],
+  "answer": "C",
+  "explanation": "EAT = 0.8 * 120 + 0.2 * 220 = 96 + 44 = 140 ns."
+ },
+ {
+  "topic": "Memory Management",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "How many pages does a 32-bit address space have with 4 KB pages?",
+  "options": [
+   "2^12",
+   "2^32",
+   "2^10",
+   "2^20"
+  ],
+  "answer": "D",
+  "explanation": "32 - 12 offset bits leaves 20 bits of page number."
+ },
+ {
+  "topic": "Paging",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "With 256-byte pages, what are the page number and offset of logical address 1234?",
+  "options": [
+   "Page 4, offset 210",
+   "Page 5, offset 210",
+   "Page 4, offset 1234",
+   "Page 1, offset 234"
+  ],
+  "answer": "A",
+  "explanation": "1234 = 4 * 256 + 210."
+ },
+ {
+  "topic": "Paging",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "What does the page table map?",
+  "options": [
+   "Frames to disk blocks",
+   "Page numbers to frame numbers",
+   "Processes to CPUs",
+   "Files to inodes"
+  ],
+  "answer": "B",
+  "explanation": "It translates each virtual page number into a physical frame number."
+ },
+ {
+  "topic": "Paging",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "What does the TLB do?",
+  "options": [
+   "Stores file data",
+   "Schedules threads",
+   "Caches recent page-to-frame translations",
+   "Holds the interrupt vector"
+  ],
+  "answer": "C",
+  "explanation": "A TLB hit avoids the extra memory access for the page table."
+ },
+ {
+  "topic": "Page Replacement",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "For the 20-reference textbook string with 3 frames, how many faults does LRU cause?",
+  "options": [
+   "9",
+   "15",
+   "18",
+   "12"
+  ],
+  "answer": "D",
+  "explanation": "FIFO gives 15, LRU 12 and Optimal 9."
+ },
+ {
+  "topic": "Page Replacement",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "Which algorithm can show Belady's anomaly?",
+  "options": [
+   "FIFO",
+   "LRU",
+   "Optimal",
+   "Any stack algorithm"
+  ],
+  "answer": "A",
+  "explanation": "With FIFO, more frames can occasionally cause more faults."
+ },
+ {
+  "topic": "Page Replacement",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "Which algorithm needs knowledge of the future and serves as a benchmark?",
+  "options": [
+   "FIFO",
+   "Optimal",
+   "LRU",
+   "Clock"
+  ],
+  "answer": "B",
+  "explanation": "OPT evicts the page not used for the longest time ahead, which cannot be known in practice."
+ },
+ {
+  "topic": "Page Replacement",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "What is thrashing?",
+  "options": [
+   "A TLB flush",
+   "A disk head crash",
+   "Excessive paging that collapses throughput",
+   "A deadlock between threads"
+  ],
+  "answer": "C",
+  "explanation": "The process spends more time paging than executing."
+ },
+ {
+  "topic": "Virtual Memory",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "What does copy-on-write defer?",
+  "options": [
+   "Loading the kernel",
+   "Formatting the disk",
+   "Scheduling the child",
+   "Copying a page until one process writes to it"
+  ],
+  "answer": "D",
+  "explanation": "Parent and child share read-only pages until a write forces a private copy."
+ },
+ {
+  "topic": "Virtual Memory",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "When is a page fault raised?",
+  "options": [
+   "When a referenced page is not resident in memory",
+   "When the CPU clock stops",
+   "When a file is deleted",
+   "When a process terminates"
+  ],
+  "answer": "A",
+  "explanation": "The valid bit is clear, so the OS must bring the page in."
+ },
+ {
+  "topic": "Virtual Memory",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "Which technique randomises memory layout to hinder exploits?",
+  "options": [
+   "NX bit",
+   "ASLR",
+   "RAID",
+   "DMA"
+  ],
+  "answer": "B",
+  "explanation": "Address space layout randomisation changes segment locations on every run."
+ },
+ {
+  "topic": "Segmentation",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "When is a segmented logical address valid?",
+  "options": [
+   "When the offset equals the limit",
+   "When the base is zero",
+   "When the offset is less than the segment limit",
+   "When the segment number is odd"
+  ],
+  "answer": "C",
+  "explanation": "The hardware compares the offset with the limit and traps otherwise."
+ },
+ {
+  "topic": "Segmentation",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "Segment 2 has base 4300 and limit 400. What does (2, 53) map to?",
+  "options": [
+   "453",
+   "4700",
+   "It is invalid",
+   "4353"
+  ],
+  "answer": "D",
+  "explanation": "Physical address = base + offset = 4300 + 53."
+ },
+ {
+  "topic": "Segmentation",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "Which fragmentation does pure segmentation suffer from?",
+  "options": [
+   "External fragmentation",
+   "Internal fragmentation only",
+   "None",
+   "Both equally"
+  ],
+  "answer": "A",
+  "explanation": "Variable-size segments leave holes between them."
+ },
+ {
+  "topic": "File Systems",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "What does a Unix inode NOT store?",
+  "options": [
+   "The owner",
+   "The file name",
+   "The permissions",
+   "Block pointers"
+  ],
+  "answer": "B",
+  "explanation": "Names live in directory entries that point to inode numbers."
+ },
+ {
+  "topic": "File Systems",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "Which kind of link shares the same inode as the original name?",
+  "options": [
+   "Symbolic link",
+   "Mount point",
+   "Hard link",
+   "Socket"
+  ],
+  "answer": "C",
+  "explanation": "A hard link is another directory entry for the same inode."
+ },
+ {
+  "topic": "File Systems",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "What does journaling provide?",
+  "options": [
+   "Larger files",
+   "Compression",
+   "Automatic encryption",
+   "Faster crash recovery by replaying a log"
+  ],
+  "answer": "D",
+  "explanation": "The log lets the file system repair itself without scanning the whole disk."
+ },
+ {
+  "topic": "Disk Scheduling",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "Which algorithm picks the pending request closest to the head?",
+  "options": [
+   "SSTF",
+   "FCFS",
+   "SCAN",
+   "C-SCAN"
+  ],
+  "answer": "A",
+  "explanation": "Shortest Seek Time First minimises each individual seek."
+ },
+ {
+  "topic": "Disk Scheduling",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "Head at 53, queue 98, 183, 37, 122, 14, 124, 65, 67. What is the FCFS head movement?",
+  "options": [
+   "236 cylinders",
+   "640 cylinders",
+   "331 cylinders",
+   "382 cylinders"
+  ],
+  "answer": "B",
+  "explanation": "Summing |differences| in arrival order gives 640."
+ },
+ {
+  "topic": "Disk Scheduling",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "Which algorithm can starve requests far from the head?",
+  "options": [
+   "SCAN",
+   "C-SCAN",
+   "SSTF",
+   "LOOK"
+  ],
+  "answer": "C",
+  "explanation": "New nearby requests can keep postponing distant ones."
+ },
+ {
+  "topic": "I/O and Storage",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "Which mechanism moves data between a device and memory without CPU involvement per byte?",
+  "options": [
+   "Polling",
+   "Programmed I/O",
+   "Spooling",
+   "DMA"
+  ],
+  "answer": "D",
+  "explanation": "Direct memory access interrupts the CPU only once the transfer completes."
+ },
+ {
+  "topic": "I/O and Storage",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "Which RAID level mirrors data on two disks?",
+  "options": [
+   "RAID 1",
+   "RAID 0",
+   "RAID 5",
+   "RAID 6"
+  ],
+  "answer": "A",
+  "explanation": "RAID 1 keeps identical copies at 50 percent usable capacity."
+ },
+ {
+  "topic": "I/O and Storage",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "How many disk failures can RAID 5 tolerate?",
+  "options": [
+   "Zero",
+   "One",
+   "Two",
+   "All but one"
+  ],
+  "answer": "B",
+  "explanation": "Single distributed parity recovers from one failed disk."
+ },
+ {
+  "topic": "System Calls",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "What interface do system calls provide?",
+  "options": [
+   "GPU to display",
+   "Compiler to linker",
+   "User programs to the kernel",
+   "Disk to network"
+  ],
+  "answer": "C",
+  "explanation": "They are the controlled entry points into kernel mode."
+ },
+ {
+  "topic": "System Calls",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "Which call replaces the current process image with a new program?",
+  "options": [
+   "fork",
+   "wait",
+   "pipe",
+   "exec"
+  ],
+  "answer": "D",
+  "explanation": "fork copies, exec replaces and wait collects the exit status."
+ },
+ {
+  "topic": "System Calls",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "Which Linux tool prints every system call a program makes?",
+  "options": [
+   "strace",
+   "top",
+   "ls",
+   "chmod"
+  ],
+  "answer": "A",
+  "explanation": "strace traces system calls with arguments and return values."
+ },
+ {
+  "topic": "Protection and Security",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "Which defence places a guard value before the return address?",
+  "options": [
+   "ASLR",
+   "Stack canary",
+   "RAID",
+   "Spooling"
+  ],
+  "answer": "B",
+  "explanation": "The canary is checked before the function returns to detect overflow."
+ },
+ {
+  "topic": "Protection and Security",
+  "difficulty": "hard",
+  "kind": "mcq",
+  "prompt": "Storing the access matrix by column gives what?",
+  "options": [
+   "Capability lists",
+   "Page tables",
+   "Access control lists",
+   "Inode tables"
+  ],
+  "answer": "C",
+  "explanation": "Each object keeps a list of domains and their rights; by rows you get capabilities."
+ },
+ {
+  "topic": "Protection and Security",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "How should passwords be stored?",
+  "options": [
+   "In plain text",
+   "Reversibly encrypted only",
+   "As unsalted MD5",
+   "As salted, slow hashes"
+  ],
+  "answer": "D",
+  "explanation": "Salted slow hashes such as bcrypt make stolen files hard to crack."
+ },
+ {
+  "topic": "Linux Commands",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "What does chmod 754 give to owner, group and others?",
+  "options": [
+   "rwx, r-x, r--",
+   "rwx, rwx, rwx",
+   "r-x, rwx, r--",
+   "rw-, r-x, r--"
+  ],
+  "answer": "A",
+  "explanation": "7 = rwx, 5 = r-x and 4 = r--."
+ },
+ {
+  "topic": "Linux Commands",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "Which command shows the first lines of a file?",
+  "options": [
+   "tail",
+   "head",
+   "wc",
+   "cut"
+  ],
+  "answer": "B",
+  "explanation": "head prints the beginning; tail prints the end."
+ },
+ {
+  "topic": "Linux Commands",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "Which operator appends output to a file?",
+  "options": [
+   ">",
+   "<",
+   ">>",
+   "|"
+  ],
+  "answer": "C",
+  "explanation": ">> appends, while > overwrites."
+ },
+ {
+  "topic": "Shell Programming",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "What does $? hold?",
+  "options": [
+   "The process ID",
+   "The argument count",
+   "The script name",
+   "The exit status of the last command"
+  ],
+  "answer": "D",
+  "explanation": "0 means success and any other value means failure."
+ },
+ {
+  "topic": "Shell Programming",
+  "difficulty": "medium",
+  "kind": "mcq",
+  "prompt": "Which expression performs integer addition in bash?",
+  "options": [
+   "$((a + b))",
+   "$(a + b)",
+   "${a + b}",
+   "[a + b]"
+  ],
+  "answer": "A",
+  "explanation": "$(( )) is arithmetic expansion; $( ) is command substitution."
+ },
+ {
+  "topic": "Shell Programming",
+  "difficulty": "easy",
+  "kind": "mcq",
+  "prompt": "What does $# hold?",
+  "options": [
+   "All the arguments",
+   "The number of command-line arguments",
+   "The last exit code",
+   "The shell's PID"
+  ],
+  "answer": "B",
+  "explanation": "$@ holds all arguments and $# counts them."
+ },
+ {
+  "topic": "Process Scheduling",
+  "difficulty": "medium",
+  "kind": "viva",
+  "prompt": "What causes starvation and how is it solved?",
+  "options": null,
+  "answer": "Unfair policies such as SJF and priority scheduling can postpone a process indefinitely. Aging raises the priority of waiting processes so they eventually run.",
+  "explanation": "Unfair policies such as SJF and priority scheduling can postpone a process indefinitely. Aging raises the priority of waiting processes so they eventually run."
+ },
+ {
+  "topic": "Threads",
+  "difficulty": "easy",
+  "kind": "viva",
+  "prompt": "What is the difference between a process and a thread?",
+  "options": null,
+  "answer": "A process owns an address space and resources. Threads inside a process share the code, heap and files and differ only in their stack and registers.",
+  "explanation": "A process owns an address space and resources. Threads inside a process share the code, heap and files and differ only in their stack and registers."
+ },
+ {
+  "topic": "Foundations",
+  "difficulty": "easy",
+  "kind": "viva",
+  "prompt": "Why does an operating system need two modes?",
+  "options": null,
+  "answer": "To stop user programs from executing privileged instructions that could damage other programs or the hardware. Kernel mode allows them and user mode forbids them.",
+  "explanation": "To stop user programs from executing privileged instructions that could damage other programs or the hardware. Kernel mode allows them and user mode forbids them."
+ },
+ {
+  "topic": "Deadlocks",
+  "difficulty": "medium",
+  "kind": "viva",
+  "prompt": "What are the four Coffman conditions?",
+  "options": null,
+  "answer": "Mutual exclusion, hold and wait, no preemption and circular wait must all hold for a deadlock.",
+  "explanation": "Mutual exclusion, hold and wait, no preemption and circular wait must all hold for a deadlock."
+ },
+ {
+  "topic": "Page Replacement",
+  "difficulty": "medium",
+  "kind": "viva",
+  "prompt": "Why is LRU better than FIFO?",
+  "options": null,
+  "answer": "LRU uses recency of use, which matches locality of reference, and as a stack algorithm it never shows Belady's anomaly.",
+  "explanation": "LRU uses recency of use, which matches locality of reference, and as a stack algorithm it never shows Belady's anomaly."
+ },
+ {
+  "topic": "Paging",
+  "difficulty": "medium",
+  "kind": "viva",
+  "prompt": "What is the benefit of a TLB?",
+  "options": null,
+  "answer": "It caches recent page-to-frame translations so most memory accesses avoid a second access to read the page table.",
+  "explanation": "It caches recent page-to-frame translations so most memory accesses avoid a second access to read the page table."
+ },
+ {
+  "topic": "Synchronization",
+  "difficulty": "hard",
+  "kind": "viva",
+  "prompt": "What three properties must a critical-section solution have?",
+  "options": null,
+  "answer": "Mutual exclusion so only one process is inside, progress so waiting processes are not postponed indefinitely, and bounded waiting so no process waits forever.",
+  "explanation": "Mutual exclusion so only one process is inside, progress so waiting processes are not postponed indefinitely, and bounded waiting so no process waits forever."
+ },
+ {
+  "topic": "Disk Scheduling",
+  "difficulty": "medium",
+  "kind": "viva",
+  "prompt": "Why do SCAN and C-SCAN avoid starvation but SSTF does not?",
+  "options": null,
+  "answer": "SCAN sweeps across the disk so every request is reached within one sweep, while SSTF always prefers the nearest request and can keep ignoring distant ones.",
+  "explanation": "SCAN sweeps across the disk so every request is reached within one sweep, while SSTF always prefers the nearest request and can keep ignoring distant ones."
+ }
+]

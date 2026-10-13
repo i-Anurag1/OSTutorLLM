@@ -1,12 +1,8 @@
-# OSTutorLLM Knowledge Base Provenance
+# Provenance of bundled data
 
-The repository ships a curated 16-document Operating Systems course corpus in `documents/`. These Markdown files are authored/curated project material; the repository does not claim they are copied from Silberschatz, faculty notes, YouTube transcripts, or another copyrighted source.
-
-The case-study specification lists these target knowledge categories: OS textbooks, Linux command notes, shell lab manuals, lecture PPTs, previous question papers, viva questions, Linux manual pages, lab solutions, animations, faculty notes, YouTube transcripts, and case studies. The ingestion pipeline accepts PDF, PPTX, DOCX, TXT and Markdown so legally obtained institutional material can be added through the Faculty/Admin upload flow.
-
-Do not bundle copyrighted textbooks, faculty-only material, paid course material, or video transcripts unless you have permission/licensing. Add source metadata and provenance when importing institutional material.
-
-## Current bundled corpus
-
-01_foundations.md through 16_exam_revision.md are the project's curated OS teaching notes.
-The benchmark in `benchmarks/os_questions.json` is an evaluation benchmark, not a model-training dataset.
+* `documents/*.md` - the Operating Systems course notes were written for this project (original text, no third-party passages).
+  Numeric examples (e.g. the 24/3/3 scheduling burst set, the 20-reference page string, the 5x3 Banker's matrices, the disk queue
+  98,183,37,122,14,124,65,67) are standard textbook problem *values*, which are facts, expressed here in original wording.
+* `question_bank.json` - multiple-choice and viva questions authored for this project.
+* `benchmarks/os_questions.json` - retrieval/answer benchmark authored together with the corpus (a regression check, not an unseen test).
+* Add your own lecture notes through Knowledge > Sources; only upload material you have the right to use.

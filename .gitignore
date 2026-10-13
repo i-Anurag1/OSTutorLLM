@@ -2,8 +2,13 @@
 __pycache__/
 *.pyc
 .pytest_cache/
-.next/
 node_modules/
-frontend/.next/
-backend/data/index/*.npz
-backend/data/index/*.json
+.next/
+*.log
+# generated retrieval index (rebuilt automatically at start-up)
+backend/data/index/*
+!backend/data/index/.gitkeep
+# training outputs (large)
+training/outputs/
+*.gguf
+*.safetensors

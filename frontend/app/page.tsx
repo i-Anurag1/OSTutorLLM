@@ -1,44 +1,127 @@
-'use client'
-import {useEffect,useMemo,useState} from 'react'
-import {api,apiBase} from '../lib/api'
-import {BrainCircuit,BookOpen,Boxes,ChartNoAxesCombined,ChevronRight,Code2,Database,FileCheck2,FlaskConical,LayoutDashboard,LogOut,Menu,Play,RefreshCw,ShieldCheck,Sparkles,Terminal,Upload,Users,Workflow,X,Zap} from 'lucide-react'
-const topics=['Linux Commands','Shell Programming','Process Scheduling','Deadlocks','Memory Management','Paging','Segmentation','File Systems','Disk Scheduling','Synchronization','Threads','Producer-Consumer',"Banker's Algorithm",'Dining Philosophers','System Calls','I/O and Storage','Protection and Security']
-const simOptions=[['CPU Scheduling','cpu'],['Page Replacement','page'],['Banker / Deadlock','banker'],['Disk Scheduling','disk'],['Producer Consumer','producer'],['Dining Philosophers','dining'],['Paging','paging'],['Segmentation','seg'],['Threads','threads']]
-const nav=[['Overview',LayoutDashboard],['AI Tutor',BrainCircuit],['Topics',BookOpen],['Simulators',Boxes],['Quiz Lab',FlaskConical],['Code Labs',Code2],['Analytics',ChartNoAxesCombined],['Knowledge Base',Database]] as const
-export default function Home(){
- const [tab,setTab]=useState('Overview'),[email,setEmail]=useState('student@ostutor.local'),[password,setPassword]=useState('Student123!'),[me,setMe]=useState<any>(),[dash,setDash]=useState<any>(),[logged,setLogged]=useState(false),[loading,setLoading]=useState(false),[error,setError]=useState(''),[mobile,setMobile]=useState(false)
- const [question,setQuestion]=useState('Explain page replacement and compare FIFO, LRU and Optimal.'),[topic,setTopic]=useState('Paging'),[difficulty,setDifficulty]=useState('medium'),[answer,setAnswer]=useState<any>()
- const [simType,setSimType]=useState('CPU Scheduling'),[sim,setSim]=useState<any>()
- const [quiz,setQuiz]=useState<any>(),[selected,setSelected]=useState<Record<string,string>>({}),[quizResult,setQuizResult]=useState<any>()
- const [code,setCode]=useState('print("Hello, OSTutorLLM")'),[codeOut,setCodeOut]=useState<any>(),[shell,setShell]=useState('echo OSTutorLLM'),[shellOut,setShellOut]=useState<any>()
- const [sources,setSources]=useState<any[]>([]),[students,setStudents]=useState<any[]>([]),[file,setFile]=useState<File|null>(null),[admin,setAdmin]=useState<any>()
- const [status,setStatus]=useState<any>()
- const load=async()=>{const u=await api('/api/auth/me');setMe(u);setLogged(true);setDash(await api('/api/dashboard'));try{setStatus(await api('/health'))}catch{}}
- useEffect(()=>{if(localStorage.getItem('ostutor_token')) load().catch(()=>localStorage.removeItem('ostutor_token'));else api('/health').then(setStatus).catch(()=>{})},[])
- const runSafe=async(fn:()=>Promise<void>)=>{setLoading(true);setError('');try{await fn()}catch(e:any){setError(e.message)}finally{setLoading(false)}}
- async function login(){await runSafe(async()=>{const r=await api('/api/auth/login',{method:'POST',body:JSON.stringify({email,password})});localStorage.setItem('ostutor_token',r.access_token);await load()})}
- async function ask(){await runSafe(async()=>setAnswer(await api('/api/tutor/chat',{method:'POST',body:JSON.stringify({message:question.trim(),topic,difficulty,mode:'teach'})})))}
- async function runSim(){await runSafe(async()=>{let path='',body:any={};switch(simType){case 'CPU Scheduling':path='/api/simulators/cpu';body={algorithm:'Round Robin',quantum:2,processes:[{pid:'P1',arrival:0,burst:5,priority:2},{pid:'P2',arrival:1,burst:3,priority:1},{pid:'P3',arrival:2,burst:4,priority:3}]};break;case 'Page Replacement':path='/api/simulators/page-replacement';body={algorithm:'LRU',reference_string:[7,0,1,2,0,3,0,4,2,3,0,3,2],frames:3};break;case 'Banker / Deadlock':path='/api/simulators/banker';body={allocation:[[0,1,0],[2,0,0],[3,0,2]],maximum:[[7,5,3],[3,2,2],[9,0,2]],available:[3,3,2]};break;case 'Disk Scheduling':path='/api/simulators/disk';body={algorithm:'SCAN',requests:[98,183,37,122,14,124,65,67],head:53,disk_size:200};break;case 'Producer Consumer':path='/api/simulators/producer-consumer';body={buffer_size:3,items:8};break;case 'Dining Philosophers':path='/api/simulators/dining-philosophers';break;case 'Paging':path='/api/simulators/paging';body={addresses:[10,11,22,35,42],page_size:4,num_frames:4};break;case 'Segmentation':path='/api/simulators/segmentation';body={segments:[{base:100,limit:50},{base:1000,limit:30}],logical:[{segment:0,offset:20},{segment:1,offset:15},{segment:1,offset:35}]};break;default:path='/api/simulators/threads'} setSim(await api(path,{method:'POST',body:JSON.stringify(body)}))})}
- async function genQuiz(kind='mcq'){await runSafe(async()=>{setQuiz(await api('/api/quizzes/generate',{method:'POST',body:JSON.stringify({topic,difficulty,count:5,kind})}));setSelected({});setQuizResult(null)})}
- async function submitQuiz(){if(!quiz?.assessment)return;const questions=quiz.assessment;const answers=Object.fromEntries(questions.map((q:any)=>[String(q.id),selected[String(q.id)]||'']));await runSafe(async()=>setQuizResult(await api('/api/quizzes/score',{method:'POST',body:JSON.stringify({questions,answers,topic})}))) }
- async function runCode(){await runSafe(async()=>setCodeOut(await api('/api/labs/python',{method:'POST',body:JSON.stringify({source:code})})))}
- async function runShell(){await runSafe(async()=>setShellOut(await api('/api/labs/shell',{method:'POST',body:JSON.stringify({script:shell})})))}
- async function loadKB(){await runSafe(async()=>{const a=await api('/api/sources');setSources(a);const s=await api('/api/admin/students');setStudents(s);try{setAdmin(await api('/api/admin/analytics'))}catch{}})}
- async function upload(){if(!file)return;await runSafe(async()=>{const fd=new FormData();fd.append('file',file);const r=await fetch(`${apiBase()}/api/sources/upload`,{method:'POST',headers:{Authorization:`Bearer ${localStorage.getItem('ostutor_token')}`},body:fd});const t=await r.text();let d:any;try{d=JSON.parse(t)}catch{d={}}if(!r.ok)throw new Error(d.detail||`Upload failed (${r.status})`);setFile(null);await loadKB()})}
- if(!logged)return <main className="login-shell"><div className="login-grid"><section className="brand-panel"><div className="brand-lockup"><div className="logo"><Sparkles size={20}/></div><div><b>OSTutorLLM</b><span>OS AI Learning Lab</span></div></div><div className="brand-copy"><p className="kicker">LOCAL-FIRST • GROUNDED • INTERACTIVE</p><h1>Learn Operating Systems like a real systems engineer.</h1><p>AI tutoring, algorithm simulators, quizzes, coding labs, analytics and a preloaded OS knowledge base in one evaluation-ready workspace.</p><div className="feature-row"><div><Zap/>Zero API key required</div><div><FileCheck2/>Preloaded sources</div><div><ShieldCheck/>RBAC built in</div></div></div></section><section className="login-card"><div className="kicker">SIGN IN</div><h2>Open your lab</h2><p className="muted">The default student account is ready immediately.</p><label>Email<input value={email} onChange={e=>setEmail(e.target.value)} autoComplete="username"/></label><label>Password<input type="password" value={password} onChange={e=>setPassword(e.target.value)} autoComplete="current-password"/></label>{error&&<ErrorBox text={error}/>}<button className="primary full" onClick={login} disabled={loading}>{loading?'Opening lab...':'Open OSTutorLLM'}<ChevronRight size={18}/></button><div className="demo-grid"><span>student@ostutor.local</span><span>Student123!</span></div><p className="tiny">Also seeded: faculty and admin evaluation accounts.</p></section></div></main>
- const visibleNav=nav.filter(([name])=>name!=='Knowledge Base'||me?.role!=='student')
- return <main className="app-shell"><aside className={`sidebar ${mobile?'open':''}`}><div className="side-head"><div className="brand-lockup"><div className="logo"><Sparkles size={18}/></div><div><b>OSTutorLLM</b><span>OS AI Learning Lab</span></div></div><button className="icon-btn mobile-only" onClick={()=>setMobile(false)}><X/></button></div><div className="nav">{visibleNav.map(([name,Icon])=><button key={name} className={tab===name?'nav-item active':'nav-item'} onClick={()=>{setTab(name);setMobile(false);if(name==='Knowledge Base')loadKB()}}><Icon size={18}/><span>{name}</span></button>)}</div><div className="side-foot"><div className="status-dot"><span/>API {status?.status==='ok'?'healthy':'checking'}</div><button className="nav-item" onClick={()=>{localStorage.removeItem('ostutor_token');setLogged(false)}}><LogOut size={18}/>Sign out</button></div></aside><div className="main"><header className="topbar"><button className="icon-btn mobile-only" onClick={()=>setMobile(true)}><Menu/></button><div><span className="breadcrumb">Workspace / {tab}</span><h2>{tab}</h2></div><div className="top-actions"><div className="role-chip"><ShieldCheck size={15}/>{me?.role}</div><div className="avatar">{(me?.name||'S').slice(0,1)}</div></div></header><section className="content">{error&&<ErrorBox text={error}/>} {tab==='Overview'&&<Overview me={me} dash={dash} setTab={setTab} setTopic={setTopic}/>} {tab==='AI Tutor'&&<Tutor question={question} setQuestion={setQuestion} topic={topic} setTopic={setTopic} difficulty={difficulty} setDifficulty={setDifficulty} answer={answer} ask={ask} loading={loading}/>} {tab==='Topics'&&<Topics setTab={setTab} setTopic={setTopic} dash={dash}/>} {tab==='Simulators'&&<Simulators simType={simType} setSimType={setSimType} runSim={runSim} sim={sim} loading={loading}/>} {tab==='Quiz Lab'&&<QuizLab topic={topic} setTopic={setTopic} difficulty={difficulty} setDifficulty={setDifficulty} quiz={quiz} selected={selected} setSelected={setSelected} quizResult={quizResult} genQuiz={genQuiz} submitQuiz={submitQuiz} loading={loading}/>} {tab==='Code Labs'&&<CodeLabs code={code} setCode={setCode} codeOut={codeOut} runCode={runCode} shell={shell} setShell={setShell} shellOut={shellOut} runShell={runShell} loading={loading}/>} {tab==='Analytics'&&<Analytics dash={dash}/>} {tab==='Knowledge Base'&&<KnowledgeBase sources={sources} students={students} admin={admin} file={file} setFile={setFile} upload={upload} loadKB={loadKB} loading={loading}/>}</section></div></main>
+"use client";
+import { useCallback, useEffect, useState } from "react";
+import { api, setToken } from "../lib/api";
+import type { Health, Topic, User } from "../lib/types";
+import { Icon } from "../lib/icons";
+import type { IconName } from "../lib/icons";
+import { Auth } from "../components/Auth";
+import { Tutor } from "../components/Tutor";
+import type { Seed } from "../components/Tutor";
+import { SIM_IDS, Simulators } from "../components/Sims";
+import { Quiz } from "../components/Quiz";
+import { Labs } from "../components/Labs";
+import { Progress } from "../components/Progress";
+import { Knowledge } from "../components/Knowledge";
+import { Palette } from "../components/Palette";
+import type { Command } from "../components/Palette";
+import { Badge, IconButton, ToastProvider, cx } from "../components/ui";
+
+type Page = "tutor" | "sims" | "quiz" | "labs" | "progress" | "knowledge";
+const NAV: { id: Page; label: string; icon: IconName }[] = [
+  { id: "tutor", label: "Tutor", icon: "tutor" }, { id: "sims", label: "Simulators", icon: "sim" }, { id: "quiz", label: "Practice", icon: "quiz" },
+  { id: "labs", label: "Code labs", icon: "labs" }, { id: "progress", label: "Progress", icon: "progress" }, { id: "knowledge", label: "Knowledge", icon: "kb" },
+];
+const isPage = (x: string): x is Page => NAV.some((n) => n.id === x);
+
+function App() {
+  const [user, setUser] = useState<User | null>(null);
+  const [ready, setReady] = useState(false);
+  const [page, setPage] = useState<Page>("tutor");
+  const [topics, setTopics] = useState<Topic[]>([]);
+  const [health, setHealth] = useState<Health | null>(null);
+  const [seed, setSeed] = useState<Seed | null>(null);
+  const [sim, setSim] = useState<string | undefined>(undefined);
+  const [quizTopic, setQuizTopic] = useState<string | undefined>(undefined);
+  const [palette, setPalette] = useState(false);
+  const [dark, setDark] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("ostutor.theme");
+    setDark(stored ? stored === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches);
+    const hash = window.location.hash.replace("#", "");
+    if (isPage(hash)) setPage(hash);
+    const t = localStorage.getItem("ostutor.token");
+    if (!t) { setReady(true); return; }
+    setToken(t);
+    api.get<User>("/api/auth/me").then(setUser).catch(() => { localStorage.removeItem("ostutor.token"); setToken(""); }).finally(() => setReady(true));
+  }, []);
+
+  useEffect(() => { document.documentElement.dataset.theme = dark ? "dark" : "light"; }, [dark]);
+  useEffect(() => { if (ready) window.history.replaceState(null, "", "#" + page); }, [page, ready]);
+
+  useEffect(() => {
+    if (!user) return;
+    api.get<Topic[]>("/api/topics").then(setTopics).catch(() => undefined);
+    const poll = () => api.get<Health>("/health").then(setHealth).catch(() => setHealth(null));
+    poll();
+    const id = setInterval(poll, 20000);
+    return () => clearInterval(id);
+  }, [user]);
+
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setPalette((p) => !p); } };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, []);
+
+  const toggleTheme = () => setDark((d) => { localStorage.setItem("ostutor.theme", d ? "light" : "dark"); return !d; });
+  const signIn = (u: User, t: string) => { setToken(t); localStorage.setItem("ostutor.token", t); setUser(u); };
+  const signOut = () => { setToken(""); localStorage.removeItem("ostutor.token"); setUser(null); setSeed(null); setHealth(null); };
+  const ask = useCallback((text: string, topic?: string) => { setSeed({ text, topic: topic ?? "", nonce: Date.now() }); setPage("tutor"); }, []);
+  const openQuiz = (topic: string) => { setQuizTopic(topic); setPage("quiz"); };
+
+  if (!ready) return <div className="splash"><div className="brandmark"><i style={{ width: 34 }} /><i style={{ width: 52, marginLeft: 12 }} /><i style={{ width: 24 }} /></div></div>;
+  if (!user) return <Auth onAuthed={signIn} />;
+
+  const commands: Command[] = [
+    ...NAV.map((n) => ({ id: "go-" + n.id, label: `Go to ${n.label}`, icon: n.icon, run: () => setPage(n.id) })),
+    ...SIM_IDS.map((s) => ({ id: "sim-" + s.id, label: `Open simulator: ${s.label}`, hint: "simulators", icon: "sim" as IconName, run: () => { setSim(s.id); setPage("sims"); } })),
+    { id: "theme", label: dark ? "Switch to light theme" : "Switch to dark theme", icon: dark ? "sun" : "moon", run: toggleTheme },
+    { id: "out", label: "Sign out", icon: "logout", run: signOut },
+  ];
+  const llm = health?.llm;
+  const llmTone = !health ? "neutral" : !llm?.reachable ? "warn" : llm.model_available === false ? "warn" : "ok";
+  const llmText = !health ? "Connecting…" : !llm?.reachable ? "Model offline" : llm.model_available === false ? "Model missing" : "Model ready";
+  const ragText = !health ? "" : health.rag.indexing ? "Indexing…" : !health.rag.ready ? "No index" : health.rag.dense_ready ? "Hybrid search" : "Keyword search";
+  const title = NAV.find((n) => n.id === page)?.label ?? "";
+
+  return (
+    <div className="app">
+      <nav className="rail" aria-label="Main">
+        <div className="rail-brand"><div className="brandmark small"><i style={{ width: 14 }} /><i style={{ width: 22, marginLeft: 5 }} /><i style={{ width: 10 }} /></div><b>OSTutor</b></div>
+        {NAV.map((n) => <button key={n.id} type="button" className={cx("rail-item", page === n.id && "on")} onClick={() => setPage(n.id)} aria-current={page === n.id ? "page" : undefined}><Icon name={n.icon} size={19} /><span>{n.label}</span></button>)}
+        <div className="rail-foot">
+          <button type="button" className="rail-item" onClick={() => setPalette(true)}><Icon name="command" size={19} /><span>Search</span><kbd>Ctrl K</kbd></button>
+        </div>
+      </nav>
+      <div className="content">
+        <header className="topbar">
+          <h1>{title}</h1>
+          <div className="row gap-s">
+            <span className="only-wide row gap-s"><Badge tone={llmTone} title={llm ? `${llm.provider} · ${llm.model}` : ""}>{llmText}</Badge>{ragText && <Badge tone={health?.rag.dense_ready ? "ok" : "info"} title={health ? `${health.rag.chunks} chunks from ${health.rag.sources} sources` : ""}>{ragText}</Badge>}</span>
+            <IconButton icon="search" label="Search (Ctrl+K)" onClick={() => setPalette(true)} />
+            <IconButton icon={dark ? "sun" : "moon"} label="Toggle theme" onClick={toggleTheme} />
+            <span className="user only-wide"><b>{user.name}</b><Badge>{user.role}</Badge></span>
+            <IconButton icon="logout" label="Sign out" onClick={signOut} />
+          </div>
+        </header>
+        <main className="main">
+          <div hidden={page !== "tutor"} className="fill"><Tutor topics={topics} seed={seed} health={health} onNavigate={(p) => { if (isPage(p)) setPage(p); }} /></div>
+          {page === "sims" && <Simulators initial={sim} />}
+          {page === "quiz" && <Quiz topics={topics} initialTopic={quizTopic} onAsk={ask} />}
+          {page === "labs" && <Labs />}
+          {page === "progress" && <Progress user={user} onAsk={ask} onQuiz={openQuiz} />}
+          {page === "knowledge" && <Knowledge user={user} />}
+        </main>
+      </div>
+      <nav className="tabbar" aria-label="Main (mobile)">
+        {NAV.map((n) => <button key={n.id} type="button" className={cx("tab", page === n.id && "on")} onClick={() => setPage(n.id)}><Icon name={n.icon} size={20} /><span>{n.label}</span></button>)}
+      </nav>
+      <Palette open={palette} onClose={() => setPalette(false)} commands={commands} onAsk={(q) => ask(q)} />
+    </div>
+  );
 }
-function ErrorBox({text}:{text:string}){return <div className="error-box"><div><b>Request failed</b><span>{text}</span></div><X size={18}/></div>}
-function PageHead({kicker,title,desc,action}:{kicker:string,title:string,desc:string,action?:React.ReactNode}){return <div className="page-head"><div><div className="kicker">{kicker}</div><h1>{title}</h1><p>{desc}</p></div>{action}</div>}
-function Overview({me,dash,setTab,setTopic}:any){return <><PageHead kicker="CONTROL CENTER" title={`Good to see you, ${me?.name}.`} desc="Everything you need to learn, simulate and measure Operating Systems from one workspace." action={<div className="health-card"><div className="pulse"/><span>Local-first mode</span><small>Ready for evaluation</small></div>}/><div className="metric-grid"><Metric label="Overall mastery" value={`${dash?.overall||0}%`} hint="Across tracked topics"/><Metric label="Topics tracked" value={dash?.topics?.length||0} hint="Adaptive progress"/><Metric label="Recent activity" value={dash?.activity?.length||0} hint="Latest sessions"/><Metric label="AI mode" value="Local" hint="No API key required"/></div><div className="dashboard-grid"><section className="panel large"><div className="panel-head"><div><b>Learning path</b><span>Start anywhere, progress everywhere.</span></div><button className="ghost" onClick={()=>setTab('Topics')}>Explore all <ChevronRight size={16}/></button></div><div className="topic-cards">{topics.slice(0,12).map((t:string,i:number)=><button className="topic-card" key={t} onClick={()=>{setTopic(t);setTab('AI Tutor')}}><div className="topic-icon">{String(i+1).padStart(2,'0')}</div><div><b>{t}</b><span>{dash?.topics?.find((x:any)=>x.topic_id===i+1)?.mastery||0}% mastery</span></div><ChevronRight size={16}/></button>)}</div></section><section className="panel"><div className="panel-head"><div><b>Activity feed</b><span>Your latest learning events.</span></div></div><div className="activity-list">{(dash?.activity||[]).slice(0,6).map((a:any,i:number)=><div className="activity" key={i}><div className="activity-dot"/><div><b>{a.kind}</b><span>{a.topic}</span></div><strong>{a.score||0}%</strong></div>)}{!(dash?.activity||[]).length&&<Empty title="No activity yet" text="Run a tutor question, quiz or lab to start building your learning telemetry."/>}</div></section></div></>}
-function Metric({label,value,hint}:{label:string,value:any,hint:string}){return <div className="metric"><span>{label}</span><strong>{value}</strong><small>{hint}</small></div>}
-function Tutor(p:any){return <><PageHead kicker="GROUNDED AI TUTOR" title="Ask. Understand. Verify." desc="Every answer is grounded in the bundled OS source corpus and shows exactly what was retrieved." action={<div className="mode-badge"><BrainCircuit size={16}/> Local-grounded AI</div>}/><div className="tutor-grid"><section className="panel composer-panel"><div className="panel-head"><div><b>Question composer</b><span>Choose a topic and ask naturally.</span></div></div><div className="row-2"><FieldSelect label="Topic" value={p.topic} onChange={p.setTopic} options={topics}/><FieldSelect label="Difficulty" value={p.difficulty} onChange={p.setDifficulty} options={['easy','medium','hard','adaptive']}/></div><label>Question<textarea value={p.question} onChange={e=>p.setQuestion(e.target.value)} rows={9}/></label><button className="primary" onClick={p.ask} disabled={p.loading}><BrainCircuit size={18}/>{p.loading?'Generating grounded answer...':'Ask OSTutor'}</button></section><section className="panel answer-panel">{p.answer?<><div className="answer-status"><span><FileCheck2 size={15}/>Grounded response</span><small>{p.answer.mode||'local-grounded'}</small></div><div className="answer-text">{String(p.answer.answer).split('\n').map((x:string,i:number)=><p key={i}>{x||' '}</p>)}</div><div className="citations"><div className="panel-label">Retrieved evidence</div>{p.answer.citations.map((s:any)=><div className="citation" key={s.id}><span>{s.id}</span><div><b>{s.source}</b><small>Chunk {s.chunk} · relevance {s.score}</small></div></div>)}</div><div className="latency"><span>{p.answer.retrieved} chunks retrieved</span><span>{p.answer.latency_ms} ms</span></div></>:<Empty title="Your grounded answer will appear here" text="Try the prefilled page-replacement question to verify the complete RAG + tutor flow."/>}</section></div></>}
-function FieldSelect({label,value,onChange,options}:{label:string,value:string,onChange:(v:string)=>void,options:string[]}){return <label>{label}<select value={value} onChange={e=>onChange(e.target.value)}>{options.map(o=><option key={o}>{o}</option>)}</select></label>}
-function Topics({setTab,setTopic,dash}:any){return <><PageHead kicker="CURRICULUM" title="Operating Systems, mapped as a real learning system." desc="Each module connects explanation, simulation, practice and measurable mastery."/><div className="topic-grid-pro">{topics.map((t:string,i:number)=><button className="topic-pro" key={t} onClick={()=>{setTopic(t);setTab('AI Tutor')}}><span className="topic-number">{String(i+1).padStart(2,'0')}</span><div><b>{t}</b><span>{dash?.topics?.find((x:any)=>x.topic_id===i+1)?.mastery||0}% mastery · Teach · Practice · Simulate</span></div><ChevronRight/></button>)}</div></>}
-function Simulators(p:any){return <><PageHead kicker="SIMULATOR LAB" title="Run canonical OS algorithms." desc="Each simulation returns a trace, metrics and complexity so you can inspect the mechanics instead of just seeing a result." action={<button className="primary" onClick={p.runSim} disabled={p.loading}><Play size={17}/>{p.loading?'Running...':'Run simulation'}</button>}/><div className="sim-layout"><section className="panel"><div className="panel-label">Algorithm</div><div className="sim-list">{simOptions.map(([name])=><button key={name} className={p.simType===name?'sim-item active':'sim-item'} onClick={()=>p.setSimType(name)}><Workflow size={16}/><span>{name}</span><ChevronRight size={16}/></button>)}</div></section><section className="panel"><div className="panel-head"><div><b>{p.simType}</b><span>Deterministic demo input is bundled.</span></div></div>{p.sim?<pre className="result-code">{JSON.stringify(p.sim,null,2)}</pre>:<Empty title="No run yet" text="Select an algorithm and run it. The result is fully local and deterministic."/>}</section></div></>}
-function QuizLab(p:any){return <><PageHead kicker="ASSESSMENT ENGINE" title="Generate, answer and score." desc="The bundled question bank means the assessment feature works without an external model." action={<div className="button-row"><button className="secondary" onClick={()=>p.genQuiz('viva')} disabled={p.loading}>Generate viva</button><button className="primary" onClick={()=>p.genQuiz('mcq')} disabled={p.loading}><Sparkles size={16}/>{p.loading?'Loading...':'Generate 5 MCQs'}</button></div>}/><section className="panel quiz-toolbar"><FieldSelect label="Topic" value={p.topic} onChange={p.setTopic} options={topics}/><FieldSelect label="Difficulty" value={p.difficulty} onChange={p.setDifficulty} options={['easy','medium','hard']}/></section>{p.quiz?<section className="quiz-stack">{p.quiz.assessment.map((q:any,i:number)=><div className="panel question-card" key={q.id}><div className="question-index">Q{i+1}</div><b>{q.question}</b><div className="options">{(q.options||[]).map((o:string,j:number)=>{const letter=String.fromCharCode(65+j);return <button key={o} className={p.selected[String(q.id)]===letter?'option selected':'option'} onClick={()=>p.setSelected({...p.selected,[String(q.id)]:letter})}><span>{letter}</span>{o}</button>})}</div><small>{q.explanation}</small></div>)}<button className="primary" onClick={p.submitQuiz} disabled={p.loading}>Submit assessment <ChevronRight size={16}/></button>{p.quizResult&&<div className="result-banner"><strong>{p.quizResult.score}%</strong><span>{p.quizResult.correct}/{p.quizResult.total} correct · {p.quizResult.recommendation}</span></div>}</section>:<Empty title="No assessment loaded" text="Generate an MCQ set or viva from the bundled question bank."/>}</>}
-function CodeLabs(p:any){return <><PageHead kicker="CODE LABS" title="Practice code with bounded execution." desc="Python and shell exercises run inside restricted backend runners with timeouts."/><div className="lab-grid"><section className="panel"><div className="panel-head"><div><b>Python Lab</b><span>Safe educational runner</span></div></div><textarea className="code-editor" value={p.code} onChange={e=>p.setCode(e.target.value)}/><button className="primary" onClick={p.runCode} disabled={p.loading}><Play size={16}/>Run Python</button>{p.codeOut&&<pre className="terminal">{(p.codeOut.stdout||'')+(p.codeOut.stderr||'')}</pre>}</section><section className="panel"><div className="panel-head"><div><b>Shell Lab</b><span>Allowlisted learning commands</span></div></div><textarea className="code-editor" value={p.shell} onChange={e=>p.setShell(e.target.value)}/><button className="primary" onClick={p.runShell} disabled={p.loading}><Terminal size={16}/>Run shell</button>{p.shellOut&&<pre className="terminal">{(p.shellOut.stdout||'')+(p.shellOut.stderr||'')}</pre>}</section></div></>}
-function Analytics({dash}:any){const attempts=(dash?.topics||[]).reduce((a:any,b:any)=>a+b.attempts,0),correct=(dash?.topics||[]).reduce((a:any,b:any)=>a+b.correct,0);return <><PageHead kicker="LEARNING ANALYTICS" title="See where your understanding is moving." desc="Progress is persisted per user and updated after scored activities."/><div className="metric-grid"><Metric label="Mastery" value={`${dash?.overall||0}%`} hint="Weighted across topics"/><Metric label="Attempts" value={attempts} hint="Recorded activities"/><Metric label="Correct" value={correct} hint="Successful attempts"/><Metric label="Accuracy" value={`${attempts?Math.round(correct/attempts*100):0}%`} hint="Across tracked activity"/></div><div className="dashboard-grid"><section className="panel large"><div className="panel-head"><div><b>Mastery by topic</b><span>Focus on the lowest bars first.</span></div></div><div className="bars">{(dash?.topics||[]).map((x:any)=><div className="bar-row" key={x.topic_id}><span>Topic {x.topic_id}</span><div><i style={{width:`${Math.min(100,x.mastery)}%`}}/></div><b>{x.mastery}%</b></div>)}{!(dash?.topics||[]).length&&<Empty title="No scored topics" text="Complete a quiz to populate your analytics."/>}</div></section><section className="panel"><div className="panel-head"><div><b>Recent activity</b><span>Persistent learning telemetry.</span></div></div>{(dash?.activity||[]).map((a:any,i:number)=><div className="activity" key={i}><div className="activity-dot"/><div><b>{a.kind}</b><span>{a.topic}</span></div><strong>{a.score||0}%</strong></div>)}</section></div></>}
-function KnowledgeBase(p:any){return <><PageHead kicker="KNOWLEDGE OPERATIONS" title="The complete source corpus is already loaded." desc="No upload is required for normal evaluation. Faculty/admin can still add approved source files and rebuild the index." action={<button className="secondary" onClick={p.loadKB}><RefreshCw size={16}/>Refresh</button>}/><div className="metric-grid"><Metric label="Bundled sources" value={p.sources.length||16} hint="Ready on first startup"/><Metric label="Question bank" value={p.admin?.questions||10} hint="Local assessment pool"/><Metric label="Users" value={p.students.length||3} hint="Seeded evaluation accounts"/><Metric label="RAG" value="READY" hint="TF-IDF hybrid retrieval"/></div><div className="dashboard-grid"><section className="panel large"><div className="panel-head"><div><b>Indexed source files</b><span>Preloaded course material.</span></div></div>{p.sources.length?p.sources.map((s:any)=><div className="source-row" key={s.id}><FileCheck2 size={17}/><div><b>{s.name}</b><span>{s.status} · {s.chunks||'indexed'} chunks</span></div><code>{String(s.checksum||'').slice(0,12)}</code></div>):<Empty title="Sources will appear after refresh" text="The API seeds the corpus automatically on startup."/>}</section><section className="panel"><div className="panel-head"><div><b>Optional upload</b><span>PDF, PPTX, DOCX, TXT, MD · max 15 MB</span></div></div><div className="upload-box"><Upload size={22}/><input type="file" accept=".pdf,.pptx,.docx,.txt,.md" onChange={e=>p.setFile(e.target.files?.[0]||null)}/><button className="primary" disabled={!p.file||p.loading} onClick={p.upload}>{p.loading?'Indexing...':'Upload & index'}</button></div><div className="panel-head people-head"><div><b>Users</b><span>Role-protected workspace</span></div></div>{p.students.map((s:any)=><div className="user-row" key={s.id}><Users size={16}/><div><b>{s.name}</b><span>{s.email}</span></div><strong>{s.role}</strong></div>)}</section></div></>}
-function Empty({title,text}:{title:string,text:string}){return <div className="empty"><div className="empty-icon"><Sparkles size={18}/></div><b>{title}</b><span>{text}</span></div>}
+
+export default function Home() {
+  return <ToastProvider><App /></ToastProvider>;
+}

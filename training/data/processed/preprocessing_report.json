@@ -1,0 +1,117 @@
+{
+  "stages": [
+    {
+      "stage": "1 normalise unicode and whitespace",
+      "before": 904,
+      "after": 904,
+      "removed": 0
+    },
+    {
+      "stage": "2 scrub PII, links and long numbers",
+      "before": 904,
+      "after": 904,
+      "removed": 0,
+      "replacements": 0
+    },
+    {
+      "stage": "3 length and language (ASCII ratio) filters",
+      "before": 904,
+      "after": 904,
+      "removed": 0
+    },
+    {
+      "stage": "4 citation integrity (ids exist, abstentions uncited)",
+      "before": 904,
+      "after": 904,
+      "removed": 0
+    },
+    {
+      "stage": "5 groundedness (answer supported by cited evidence)",
+      "before": 904,
+      "after": 904,
+      "removed": 0
+    },
+    {
+      "stage": "6 exact de-duplication",
+      "before": 904,
+      "after": 884,
+      "removed": 20
+    },
+    {
+      "stage": "7 near-duplicate removal (3-gram Jaccard >= 0.9)",
+      "before": 884,
+      "after": 846,
+      "removed": 38
+    },
+    {
+      "stage": "8 benchmark decontamination (question Jaccard >= 0.6)",
+      "before": 846,
+      "after": 826,
+      "removed": 20
+    },
+    {
+      "stage": "9 leakage-safe grouped split 80/10/10",
+      "before": 826,
+      "after": 826,
+      "removed": 0,
+      "sizes": {
+        "train": 647,
+        "test": 91,
+        "val": 88
+      }
+    }
+  ],
+  "seed": 20261010,
+  "raw_examples": 904,
+  "final_examples": 826,
+  "raw_by_type": {
+    "corpus_teach": 204,
+    "worked_cpu": 45,
+    "corpus_define": 27,
+    "worked_eat": 45,
+    "abstain_nearmiss": 32,
+    "quiz_explain": 62,
+    "worked_seg": 45,
+    "corpus_exam": 102,
+    "abstain_offtopic": 60,
+    "worked_paging": 45,
+    "corpus_socratic": 102,
+    "worked_page": 45,
+    "worked_disk": 45,
+    "worked_banker": 45
+  },
+  "final_by_type": {
+    "corpus_teach": 175,
+    "worked_cpu": 45,
+    "corpus_define": 24,
+    "worked_eat": 34,
+    "abstain_nearmiss": 32,
+    "quiz_explain": 62,
+    "worked_seg": 45,
+    "corpus_exam": 97,
+    "abstain_offtopic": 33,
+    "worked_paging": 45,
+    "corpus_socratic": 99,
+    "worked_page": 45,
+    "worked_disk": 45,
+    "worked_banker": 45
+  },
+  "final_by_mode": {
+    "teach": 630,
+    "exam": 97,
+    "socratic": 99
+  },
+  "final_by_split": {
+    "train": 647,
+    "test": 91,
+    "val": 88
+  },
+  "abstention_share": 0.079,
+  "approx_tokens": {
+    "mean": 513,
+    "max": 845,
+    "p95": 668
+  },
+  "corpus_sections": 105,
+  "teacher_used": false
+}

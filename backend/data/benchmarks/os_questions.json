@@ -1,110 +1,586 @@
 [
-  {
-    "id": "os01",
-    "question": "What is paging and how does it use pages and frames?",
-    "difficulty": "easy",
-    "gold_concepts": [
-      "paging",
-      "pages",
-      "frames"
-    ],
-    "gold_sources": [
-      "06_memory_management.md",
-      "08_segmentation.md"
-    ]
-  },
-  {
-    "id": "os02",
-    "question": "Compare FCFS and Round Robin process scheduling.",
-    "difficulty": "medium",
-    "gold_concepts": [
-      "FCFS",
-      "Round Robin",
-      "time quantum",
-      "waiting time"
-    ],
-    "gold_sources": [
-      "02_process_scheduling.md"
-    ]
-  },
-  {
-    "id": "os03",
-    "question": "Explain the four necessary conditions for deadlock.",
-    "difficulty": "medium",
-    "gold_concepts": [
-      "mutual exclusion",
-      "hold and wait",
-      "no preemption",
-      "circular wait"
-    ],
-    "gold_sources": [
-      "05_deadlocks.md"
-    ]
-  },
-  {
-    "id": "os04",
-    "question": "How does LRU page replacement work?",
-    "difficulty": "medium",
-    "gold_concepts": [
-      "LRU",
-      "page replacement",
-      "page fault"
-    ],
-    "gold_sources": [
-      "07_page_replacement.md"
-    ]
-  },
-  {
-    "id": "os05",
-    "question": "What is a system call and why is it used?",
-    "difficulty": "easy",
-    "gold_concepts": [
-      "system call",
-      "kernel",
-      "user"
-    ],
-    "gold_sources": [
-      "12_system_calls.md"
-    ]
-  },
-  {
-    "id": "os06",
-    "question": "What is the purpose of the Linux shell and common shell commands?",
-    "difficulty": "easy",
-    "gold_concepts": [
-      "shell",
-      "Linux",
-      "command"
-    ],
-    "gold_sources": [
-      "11_linux_shell.md"
-    ]
-  },
-  {
-    "id": "os07",
-    "question": "Explain Bankers algorithm and a safe state.",
-    "difficulty": "hard",
-    "gold_concepts": [
-      "Banker",
-      "safe state",
-      "resource",
-      "deadlock"
-    ],
-    "gold_sources": [
-      "05_deadlocks.md"
-    ]
-  },
-  {
-    "id": "os08",
-    "question": "What is virtual memory and why are page faults important?",
-    "difficulty": "medium",
-    "gold_concepts": [
-      "virtual memory",
-      "page fault",
-      "demand paging"
-    ],
-    "gold_sources": [
-      "13_virtual_memory.md"
-    ]
-  }
+ {
+  "id": "os01",
+  "question": "What is paging and how does it use pages and frames?",
+  "difficulty": "easy",
+  "gold_concepts": [
+   "paging",
+   "pages",
+   "frames",
+   "page table"
+  ],
+  "gold_sources": [
+   "06_memory_management.md"
+  ]
+ },
+ {
+  "id": "os02",
+  "question": "Compare FCFS and Round Robin process scheduling.",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "FCFS",
+   "Round Robin",
+   "time quantum",
+   "waiting time"
+  ],
+  "gold_sources": [
+   "02_process_scheduling.md"
+  ]
+ },
+ {
+  "id": "os03",
+  "question": "What is the convoy effect?",
+  "difficulty": "easy",
+  "gold_concepts": [
+   "convoy",
+   "FCFS",
+   "short"
+  ],
+  "gold_sources": [
+   "02_process_scheduling.md"
+  ]
+ },
+ {
+  "id": "os04",
+  "question": "How does the Banker's algorithm decide whether a state is safe?",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "safe",
+   "Need",
+   "Work",
+   "Allocation"
+  ],
+  "gold_sources": [
+   "05_deadlocks.md"
+  ]
+ },
+ {
+  "id": "os05",
+  "question": "What are the four Coffman conditions for deadlock?",
+  "difficulty": "easy",
+  "gold_concepts": [
+   "mutual exclusion",
+   "hold and wait",
+   "no preemption",
+   "circular wait"
+  ],
+  "gold_sources": [
+   "05_deadlocks.md"
+  ]
+ },
+ {
+  "id": "os06",
+  "question": "How does the TLB reduce paging overhead and what is effective access time?",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "TLB",
+   "hit",
+   "effective access time"
+  ],
+  "gold_sources": [
+   "06_memory_management.md"
+  ]
+ },
+ {
+  "id": "os07",
+  "question": "What is Belady's anomaly?",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "FIFO",
+   "frames",
+   "page faults"
+  ],
+  "gold_sources": [
+   "07_page_replacement.md"
+  ]
+ },
+ {
+  "id": "os08",
+  "question": "How does LRU page replacement work?",
+  "difficulty": "easy",
+  "gold_concepts": [
+   "least recently used",
+   "evict",
+   "recent"
+  ],
+  "gold_sources": [
+   "07_page_replacement.md"
+  ]
+ },
+ {
+  "id": "os09",
+  "question": "Explain thrashing and the working set model.",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "thrashing",
+   "working set",
+   "page fault"
+  ],
+  "gold_sources": [
+   "07_page_replacement.md",
+   "13_virtual_memory.md"
+  ]
+ },
+ {
+  "id": "os10",
+  "question": "What is a segment table and how is a logical address translated in segmentation?",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "base",
+   "limit",
+   "offset",
+   "segment"
+  ],
+  "gold_sources": [
+   "08_segmentation.md"
+  ]
+ },
+ {
+  "id": "os11",
+  "question": "What is the difference between a process and a thread?",
+  "difficulty": "easy",
+  "gold_concepts": [
+   "address space",
+   "stack",
+   "share"
+  ],
+  "gold_sources": [
+   "03_threads.md"
+  ]
+ },
+ {
+  "id": "os12",
+  "question": "Explain the producer-consumer problem with semaphores.",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "empty",
+   "full",
+   "mutex",
+   "buffer"
+  ],
+  "gold_sources": [
+   "04_synchronization.md"
+  ]
+ },
+ {
+  "id": "os13",
+  "question": "How can the dining philosophers problem be solved?",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "forks",
+   "deadlock",
+   "resource ordering"
+  ],
+  "gold_sources": [
+   "04_synchronization.md"
+  ]
+ },
+ {
+  "id": "os14",
+  "question": "What is the difference between a hard link and a symbolic link?",
+  "difficulty": "easy",
+  "gold_concepts": [
+   "inode",
+   "link count",
+   "path"
+  ],
+  "gold_sources": [
+   "09_file_systems.md"
+  ]
+ },
+ {
+  "id": "os15",
+  "question": "How are inodes structured with direct and indirect pointers?",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "inode",
+   "direct",
+   "indirect",
+   "pointer"
+  ],
+  "gold_sources": [
+   "09_file_systems.md"
+  ]
+ },
+ {
+  "id": "os16",
+  "question": "Compare SCAN and C-SCAN disk scheduling.",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "SCAN",
+   "C-SCAN",
+   "head",
+   "cylinder"
+  ],
+  "gold_sources": [
+   "10_disk_scheduling.md"
+  ]
+ },
+ {
+  "id": "os17",
+  "question": "What is SSTF and what problem can it cause?",
+  "difficulty": "easy",
+  "gold_concepts": [
+   "SSTF",
+   "closest",
+   "starve"
+  ],
+  "gold_sources": [
+   "10_disk_scheduling.md"
+  ]
+ },
+ {
+  "id": "os18",
+  "question": "How do Linux file permissions work and what does chmod 754 mean?",
+  "difficulty": "easy",
+  "gold_concepts": [
+   "read",
+   "write",
+   "execute",
+   "octal"
+  ],
+  "gold_sources": [
+   "11_linux_shell.md"
+  ]
+ },
+ {
+  "id": "os19",
+  "question": "How do pipes and redirection work in the shell?",
+  "difficulty": "easy",
+  "gold_concepts": [
+   "pipe",
+   "redirect",
+   "standard output"
+  ],
+  "gold_sources": [
+   "11_linux_shell.md"
+  ]
+ },
+ {
+  "id": "os20",
+  "question": "What happens during a system call?",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "trap",
+   "kernel mode",
+   "system call table"
+  ],
+  "gold_sources": [
+   "12_system_calls.md"
+  ]
+ },
+ {
+  "id": "os21",
+  "question": "What does fork return in the parent and in the child?",
+  "difficulty": "easy",
+  "gold_concepts": [
+   "fork",
+   "zero",
+   "process ID"
+  ],
+  "gold_sources": [
+   "12_system_calls.md",
+   "03_threads.md"
+  ]
+ },
+ {
+  "id": "os22",
+  "question": "What is copy-on-write?",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "copy",
+   "read-only",
+   "write",
+   "fork"
+  ],
+  "gold_sources": [
+   "13_virtual_memory.md"
+  ]
+ },
+ {
+  "id": "os23",
+  "question": "What is a buffer overflow and how can it be prevented?",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "buffer overflow",
+   "stack canary",
+   "ASLR",
+   "NX"
+  ],
+  "gold_sources": [
+   "14_security_protection.md"
+  ]
+ },
+ {
+  "id": "os24",
+  "question": "What is the difference between an access control list and a capability list?",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "access matrix",
+   "ACL",
+   "capability"
+  ],
+  "gold_sources": [
+   "14_security_protection.md"
+  ]
+ },
+ {
+  "id": "os25",
+  "question": "Compare polling, interrupts and DMA.",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "polling",
+   "interrupt",
+   "DMA"
+  ],
+  "gold_sources": [
+   "15_io_storage.md"
+  ]
+ },
+ {
+  "id": "os26",
+  "question": "What are the RAID levels and which ones survive a disk failure?",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "RAID 0",
+   "RAID 1",
+   "RAID 5",
+   "parity"
+  ],
+  "gold_sources": [
+   "15_io_storage.md"
+  ]
+ },
+ {
+  "id": "os27",
+  "question": "What is the difference between kernel mode and user mode?",
+  "difficulty": "easy",
+  "gold_concepts": [
+   "privileged",
+   "mode bit",
+   "trap"
+  ],
+  "gold_sources": [
+   "01_foundations.md"
+  ]
+ },
+ {
+  "id": "os28",
+  "question": "What is a microkernel and how does it differ from a monolithic kernel?",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "microkernel",
+   "monolithic",
+   "user space"
+  ],
+  "gold_sources": [
+   "01_foundations.md"
+  ]
+ },
+ {
+  "id": "os29",
+  "question": "How does aging prevent starvation in priority scheduling?",
+  "difficulty": "easy",
+  "gold_concepts": [
+   "aging",
+   "priority",
+   "starvation"
+  ],
+  "gold_sources": [
+   "02_process_scheduling.md"
+  ]
+ },
+ {
+  "id": "os30",
+  "question": "What is the difference between internal and external fragmentation?",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "internal",
+   "external",
+   "fragmentation"
+  ],
+  "gold_sources": [
+   "06_memory_management.md",
+   "08_segmentation.md",
+   "16_exam_revision.md"
+  ]
+ },
+ {
+  "id": "os31",
+  "question": "What is a race condition and what must a critical section solution guarantee?",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "race condition",
+   "mutual exclusion",
+   "progress",
+   "bounded waiting"
+  ],
+  "gold_sources": [
+   "04_synchronization.md"
+  ]
+ },
+ {
+  "id": "os32",
+  "question": "How do you calculate waiting time and turnaround time?",
+  "difficulty": "easy",
+  "gold_concepts": [
+   "turnaround",
+   "waiting",
+   "burst",
+   "arrival"
+  ],
+  "gold_sources": [
+   "02_process_scheduling.md",
+   "16_exam_revision.md"
+  ]
+ },
+ {
+  "id": "os33",
+  "question": "What is the difference between deadlock prevention and deadlock avoidance?",
+  "difficulty": "hard",
+  "gold_concepts": [
+   "prevention",
+   "avoidance",
+   "safe state",
+   "Coffman"
+  ],
+  "gold_sources": [
+   "05_deadlocks.md"
+  ]
+ },
+ {
+  "id": "os34",
+  "question": "Explain the clock (second chance) page replacement algorithm.",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "reference bit",
+   "second chance",
+   "hand"
+  ],
+  "gold_sources": [
+   "07_page_replacement.md"
+  ]
+ },
+ {
+  "id": "os35",
+  "question": "What is a zombie process?",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "zombie",
+   "wait",
+   "exit status"
+  ],
+  "gold_sources": [
+   "03_threads.md"
+  ]
+ },
+ {
+  "id": "os36",
+  "question": "What is journaling in a file system?",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "journal",
+   "log",
+   "crash",
+   "fsck"
+  ],
+  "gold_sources": [
+   "09_file_systems.md"
+  ]
+ },
+ {
+  "id": "os37",
+  "question": "What does the flash translation layer in an SSD do?",
+  "difficulty": "hard",
+  "gold_concepts": [
+   "flash translation layer",
+   "wear levelling",
+   "garbage collection"
+  ],
+  "gold_sources": [
+   "15_io_storage.md"
+  ]
+ },
+ {
+  "id": "os38",
+  "question": "How do multilevel page tables save memory?",
+  "difficulty": "hard",
+  "gold_concepts": [
+   "multilevel",
+   "page table",
+   "memory"
+  ],
+  "gold_sources": [
+   "06_memory_management.md"
+  ]
+ },
+ {
+  "id": "os39",
+  "question": "What is the difference between a mutex and a spinlock?",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "spinlock",
+   "busy",
+   "mutex",
+   "sleep"
+  ],
+  "gold_sources": [
+   "04_synchronization.md"
+  ]
+ },
+ {
+  "id": "os40",
+  "question": "What is demand paging and what happens when a page fault occurs?",
+  "difficulty": "medium",
+  "gold_concepts": [
+   "demand paging",
+   "page fault",
+   "valid",
+   "frame"
+  ],
+  "gold_sources": [
+   "07_page_replacement.md",
+   "13_virtual_memory.md"
+  ]
+ },
+ {
+  "id": "oos01",
+  "question": "Who won the football world cup in 2018?",
+  "difficulty": "n/a",
+  "gold_concepts": [],
+  "gold_sources": [],
+  "out_of_scope": true
+ },
+ {
+  "id": "oos02",
+  "question": "What is the capital of France?",
+  "difficulty": "n/a",
+  "gold_concepts": [],
+  "gold_sources": [],
+  "out_of_scope": true
+ },
+ {
+  "id": "oos03",
+  "question": "Explain how quantum computing works.",
+  "difficulty": "n/a",
+  "gold_concepts": [],
+  "gold_sources": [],
+  "out_of_scope": true
+ },
+ {
+  "id": "oos04",
+  "question": "Give me a recipe for sourdough bread.",
+  "difficulty": "n/a",
+  "gold_concepts": [],
+  "gold_sources": [],
+  "out_of_scope": true
+ },
+ {
+  "id": "oos05",
+  "question": "What is the stock price of Tesla today?",
+  "difficulty": "n/a",
+  "gold_concepts": [],
+  "gold_sources": [],
+  "out_of_scope": true
+ }
 ]

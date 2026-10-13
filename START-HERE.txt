@@ -1,12 +1,14 @@
-OSTutorLLM FINAL - OPTION 1
+OSTutor - quick start
 
-1. Install Docker Desktop.
-2. Install Ollama: https://ollama.com/download
-3. Make sure Ollama is running.
-4. Run RUN.bat on Windows.
-5. Open http://localhost:3000
+1. Install Docker Desktop  (https://www.docker.com/products/docker-desktop)
+2. Install Ollama          (https://ollama.com/download)   [optional but recommended]
+3. Windows: double-click RUN.bat       macOS/Linux: scripts/start.sh
+4. Open http://localhost:3000
+   Demo logins: student@ostutor.local / Student123!   faculty@ostutor.local / Faculty123!   admin@ostutor.local / Admin123!
 
-No cloud API key is required. The app uses local Qwen3 14B through Ollama.
-The first startup also downloads BAAI/bge-large-en-v1.5 and BAAI/bge-reranker-base automatically inside the Docker Hugging Face cache.
+Without Ollama the tutor still answers, directly from your notes ("extractive" mode).
+The first start downloads two retrieval models in the background; search is usable immediately and upgrades itself.
 
-If you want a cloud OpenAI-compatible provider instead, set LLM_BASE_URL, LLM_API_KEY and LLM_MODEL in .env.
+Check everything offline (no Docker needed):  python scripts/verify.py
+Fine-tune your own model:                     see training/README.md
+Full documentation:                           README.md

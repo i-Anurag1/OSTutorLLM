@@ -1,468 +1,75 @@
+# OSTutor — a grounded Operating Systems tutor
 
-## FINAL OPTION 1: RAG + Instruction-Tuned Qwen3 14B
-
-This build implements the Option 1 architecture from the supplied case-study specification: an instruction-tuned LLM backed by an OS knowledge base, dense embeddings, a vector store, hybrid retrieval, reranking, citations, grounded validation, caching, background ingestion, PostgreSQL persistence, and RAG evaluation. The case study explicitly describes Option 1 as “RAG + Instruction-Tuned LLM” and lists embeddings plus FAISS/ChromaDB/Milvus/Weaviate as the knowledge-base layer.
-
-### Local AI stack
-- Qwen3 14B through Ollama's local OpenAI-compatible endpoint
-- BAAI/bge-large-en-v1.5 dense embeddings
-- FAISS IndexFlatIP vector store
-- BM25 + TF-IDF sparse retrieval
-- Reciprocal Rank Fusion (RRF) hybrid retrieval
-- BAAI/bge-reranker-base cross-encoder reranking
-- Metadata filtering by topic/source/type/path
-- Citation IDs with page/slide and chunk metadata
-- Citation and evidence-overlap validation
-- Redis response/retrieval cache
-- Redis/RQ background ingestion worker
-- PostgreSQL persistence for application data and ingestion jobs
-- Retrieval and answer evaluation with Recall@5, MRR, nDCG@5, groundedness, citation correctness, concept coverage and hallucination proxy
-
-### No API key required for the default setup
-Install Ollama, run `ollama pull qwen3:14b`, then run `RUN.bat`. Qwen3 runs locally. The BGE embedding and reranker models are downloaded from Hugging Face on first startup and cached in the Docker `hf_cache` volume.
-
-### Important distinction about fine-tuning
-The supplied specification calls fine-tuning **Option 2**, separately from Option 1. This final Option 1 build therefore uses the instruction-tuned Qwen3 model rather than falsely claiming that a new fine-tuned checkpoint was trained. An optional `training/` folder documents the path to a future QLoRA experiment.
+Ask an Operating Systems question and get an answer built **only from your course material**, with every sentence marked by the
+source that supports it. Around the tutor: step-through simulators, sandboxed code labs, quizzes with viva grading, a mastery
+dashboard, and a retrieval lab that shows exactly what the tutor saw. Runs locally (Docker + Ollama), no cloud key needed.
 
 ```
- ██████╗ ███████╗████████╗██╗   ██╗████████╗ ██████╗ ██████╗ ██╗     ██╗     ███╗   ███╗
-██╔═══██╗██╔════╝╚══██╔══╝██║   ██║╚══██╔══╝██╔═══██╗██╔══██╗██║     ██║     ████╗ ████║
-██║   ██║███████╗   ██║   ██║   ██║   ██║   ██║   ██║██████╔╝██║     ██║     ██╔████╔██║
-██║   ██║╚════██║   ██║   ██║   ██║   ██║   ██║   ██║██╔══██╗██║     ██║     ██║╚██╔╝██║
-╚██████╔╝███████║   ██║   ╚██████╔╝   ██║   ╚██████╔╝██║  ██║███████╗███████╗██║ ╚═╝ ██║
- ╚═════╝ ╚══════╝   ╚═╝    ╚═════╝    ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝     ╚═╝
-
-     ██████╗ ███████╗    ██╗      █████╗ ██████╗ 
-    ██╔═══██╗██╔════╝    ██║     ██╔══██╗██╔══██╗
-    ██║   ██║███████╗    ██║     ███████║██████╔╝
-    ██║   ██║╚════██║    ██║     ██╔══██║██╔══██╗
-    ╚██████╔╝███████║    ███████╗██║  ██║██████╔╝
-     ╚═════╝ ╚══════╝    ╚══════╝╚═╝  ╚═╝╚═════╝ 
-
-           L O C A L - F I R S T   O P E R A T I N G   S Y S T E M S   A I   L A B
+ Next.js UI ──► FastAPI ──► hybrid RAG ──► Ollama (Qwen3 or your fine-tuned model)
+   │              │  │          BM25 + TF-IDF now · BGE + FAISS when ready · rerank · MMR
+   │              │  └─ PostgreSQL (users, progress, conversations)   Redis (cache, ingestion queue) ─► RQ worker
+   └─ SSE streaming, evidence lanes, simulators, labs, quizzes
 ```
 
-<div align="center">
+## Quick start
+1. Install **Docker Desktop** and (recommended) **Ollama** (https://ollama.com/download).
+2. Windows: double-click `RUN.bat`. macOS/Linux: `scripts/start.sh`. (First run pulls the model and builds the images.)
+3. Open **http://localhost:3000** and use a demo account: `student@ostutor.local / Student123!`,
+   `faculty@ostutor.local / Faculty123!`, `admin@ostutor.local / Admin123!`.
 
-# 🖥️ OSTutorLLM 3.0
+Without Ollama the app still works: answers are assembled directly from your notes ("extractive" mode, clearly badged).
+Retrieval is usable immediately (keyword/BM25); the dense embedding model downloads in the background and upgrades search to
+hybrid without a restart. Check **Knowledge → System** for the live status.
 
-### Local-First Operating Systems AI Lab
+## What is in it
+| Area | What you get |
+|---|---|
+| **Tutor** | Streaming answers, Teach / Socratic / Exam modes, adaptive level, conversation history, 👍/👎 feedback, follow-up suggestions. **Evidence lanes**: each sentence gets a coloured margin bar for the source that supports it; claims the evidence does not support get a dashed amber bar. `[S#]` chips open the exact passage. The tutor **declines** (and says so) when the notes do not cover the question. |
+| **RAG** | Heading-aware chunking with section titles in every chunk · own BM25 + TF-IDF (uni/bigram) · glossary query expansion (LRU→least recently used, TLB, FCFS…) · dense BGE vectors (NumPy or FAISS) · weighted RRF fusion · optional cross-encoder rerank · MMR diversification · evidence-coverage confidence and abstention · fingerprinted index that rebuilds itself when documents change and reloads when the worker re-indexes. |
+| **Simulators** | CPU scheduling (6 algorithms + compare), page replacement (FIFO/LRU/Optimal/Clock/LFU, Belady’s anomaly), paging + TLB, segmentation, disk scheduling (6), Banker’s algorithm with request check, producer–consumer, dining philosophers (naive deadlock + 3 fixes), thread life cycle. All step-through; all checked against textbook results. |
+| **Code labs** | Python and shell sandboxes with 9 auto-graded exercises. Import allow-list, restricted bash with a whitelisted PATH, unprivileged user, CPU/memory/output limits. |
+| **Practice** | 62 multiple-choice questions + 8 viva questions covering all 20 topics. **Scored on the server** (answers never reach the browser early). |
+| **Knowledge** | Retrieval lab (per-stage scores), source upload with live indexing, benchmark evaluation, system status. |
+| **Fine-tuning** | Original dataset + full QLoRA pipeline in `training/` — see its README. |
 
-**Zero-config, offline-capable Operating Systems tutor, simulator suite, and lab environment — dockerized end-to-end.**
-
-[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
-[![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![PostgreSQL](https://img.shields.io/badge/DB-PostgreSQL-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Redis](https://img.shields.io/badge/Cache-Redis-DC382D?logo=redis&logoColor=white)](https://redis.io/)
-[![JWT](https://img.shields.io/badge/Auth-JWT%2FRBAC-black?logo=jsonwebtokens)](https://jwt.io/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](#-license)
-[![Status](https://img.shields.io/badge/Build-Passing-brightgreen)](#-troubleshooting)
-[![PRs](https://img.shields.io/badge/PRs-welcome-blueviolet)](#-contributing)
-
-**No API key. No manual setup. One command, one browser tab, fully working OS course lab.**
-
-[Quick Start](#-zero-config-launch) · [Features](#-included) · [Simulators](#-simulator-suite) · [Architecture](#-architecture) · [API Docs](#-api-reference) · [Accounts](#-evaluation-accounts)
-
-</div>
-
----
-
-## 📖 Table of Contents
-
-- [Overview](#-overview)
-- [Zero-Config Launch](#-zero-config-launch)
-- [Evaluation Accounts](#-evaluation-accounts)
-- [What's Included](#-included)
-- [Architecture](#-architecture)
-- [Request Flow — AI Tutor](#-request-flow--ai-tutor)
-- [Simulator Suite](#-simulator-suite)
-- [Data & Auth Model](#-data--auth-model)
-- [Project Structure](#-project-structure)
-- [Optional External LLM](#-optional-external-llm)
-- [Operations](#-operations)
-- [Troubleshooting](#-troubleshooting)
-- [Roadmap](#-roadmap)
-- [Contributing](#-contributing)
-- [License](#-license)
-
----
-
-## 🧭 Overview
-
-**OSTutorLLM** packages a full-semester Operating Systems lab into a single `docker compose up`. It ships with:
-
-- A **grounded AI tutor** that cites the exact source passage it answered from — no hallucinated theory.
-- **9+ interactive simulators** covering scheduling, memory, concurrency, and deadlock.
-- A **question bank + viva engine** with persistent mastery tracking per student.
-- **Sandboxed Python & shell labs** for hands-on systems programming.
-- **Faculty/Admin tooling** for corpus management, analytics, and RBAC.
-
-It works **completely offline** by default — the bundled 16-file OS corpus and local retrieval engine mean no external LLM key is required to get full functionality.
-
----
-
-## ⚡ Zero-Config Launch
-
-```powershell
-# 1. Install Docker Desktop
-# 2. Extract this folder
-# 3. From the project root:
-docker compose up --build
-```
-
-| Service        | URL                              |
-|----------------|-----------------------------------|
-| 🌐 Web App      | http://localhost:3000            |
-| 📘 API Docs      | http://localhost:8000/docs       |
-| ❤️ Health Check  | http://localhost:8000/health     |
-
-> No source upload required — the bundled **16-file OS corpus** is indexed automatically on first boot.
-> No external LLM key required — the **local grounded tutor** and bundled assessment flow work out of the box.
-> An OpenAI-compatible **Qwen/Llama** endpoint can be plugged in later via environment variables.
-
----
-
-## 🔑 Evaluation Accounts
-
-| Role     | Email                        | Password       |
-|----------|-------------------------------|----------------|
-| 🎓 Student | `student@ostutor.local`      | `Student123!`  |
-| 🧑‍🏫 Faculty | `faculty@ostutor.local`      | `Faculty123!`  |
-| 🛠️ Admin   | `admin@ostutor.local`        | `Admin123!`    |
-
----
-
-## 📦 Included
-
-<table>
-<tr><td width="50%" valign="top">
-
-**AI & Retrieval**
-- AI Tutor with evidence citations
-- Hybrid TF‑IDF retrieval engine
-- Bundled OS source corpus (16 files)
-- PDF / PPTX / DOCX / TXT / MD ingestion
-
-**Assessment**
-- Quiz & viva question bank
-- Automated scoring
-- Persistent mastery analytics
-
-</td><td width="50%" valign="top">
-
-**Simulators**
-- CPU scheduling (FCFS, SJF, RR, Priority)
-- Page replacement (FIFO, LRU, Optimal)
-- Banker's algorithm / deadlock detection
-- Disk scheduling (FCFS, SCAN, C-SCAN, SSTF)
-- Paging & segmentation
-- Producer–consumer
-- Dining philosophers
-- Thread lifecycle
-
-**Labs & Ops**
-- Restricted Python & shell labs
-- Faculty/admin source management
-- JWT / RBAC auth
-- PostgreSQL + Redis
-- Docker healthchecks
-- Responsive web UI
-
-</td></tr>
-</table>
-
----
-
-## 🏗️ Architecture
-
-```mermaid
-flowchart TB
-    subgraph Client["🖥️ Client Layer"]
-        UI["React / Web UI<br/>localhost:3000"]
-    end
-
-    subgraph Edge["🚪 API Gateway"]
-        API["FastAPI Backend<br/>localhost:8000"]
-        AUTH["JWT / RBAC<br/>Auth Middleware"]
-    end
-
-    subgraph Core["🧠 Core Services"]
-        TUTOR["AI Tutor Engine<br/>Grounded Fallback"]
-        RETR["Hybrid TF‑IDF<br/>Retriever"]
-        SIM["Simulator Engine<br/>9 Modules"]
-        LAB["Sandboxed Lab Runner<br/>Python / Shell"]
-        QUIZ["Quiz / Viva Engine<br/>Scoring & Bank"]
-    end
-
-    subgraph Data["💾 Data Layer"]
-        PG[("PostgreSQL<br/>Users · Analytics · Bank")]
-        REDIS[("Redis<br/>Sessions · Cache")]
-        CORPUS[("OS Corpus<br/>16 Files, Indexed")]
-    end
-
-    subgraph Ext["☁️ Optional External"]
-        LLM["Qwen / Llama<br/>OpenAI‑compatible endpoint"]
-    end
-
-    UI -->|HTTPS / JSON| API
-    API --> AUTH
-    AUTH --> TUTOR
-    AUTH --> SIM
-    AUTH --> LAB
-    AUTH --> QUIZ
-
-    TUTOR --> RETR
-    RETR --> CORPUS
-    TUTOR -.optional.-> LLM
-
-    TUTOR --> PG
-    QUIZ --> PG
-    SIM --> PG
-    AUTH --> REDIS
-
-    style UI fill:#61DAFB,color:#000
-    style API fill:#009688,color:#fff
-    style TUTOR fill:#8B5CF6,color:#fff
-    style PG fill:#4169E1,color:#fff
-    style REDIS fill:#DC382D,color:#fff
-    style LLM fill:#F59E0B,color:#000,stroke-dasharray: 5 5
-```
-
----
-
-## 🔄 Request Flow — AI Tutor
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant S as 👩‍🎓 Student (UI)
-    participant A as 🚪 API (FastAPI)
-    participant R as 🔎 TF‑IDF Retriever
-    participant C as 📚 OS Corpus
-    participant T as 🧠 Tutor Engine
-    participant L as ☁️ External LLM (optional)
-    participant D as 💾 PostgreSQL
-
-    S->>A: Ask question ("Explain Banker's algorithm")
-    A->>A: Validate JWT / RBAC scope
-    A->>R: Forward query
-    R->>C: Rank & retrieve top passages
-    C-->>R: Ranked evidence chunks
-    R-->>T: Evidence + query
-
-    alt External LLM configured
-        T->>L: Query + grounded context
-        L-->>T: Generated answer
-    else Local-only mode (default)
-        T->>T: Compose grounded answer from evidence
-    end
-
-    T-->>A: Answer + cited sources
-    A->>D: Log interaction + update mastery
-    A-->>S: Answer with evidence citations
-```
-
----
-
-## 🧩 Simulator Suite
-
-<div align="center">
-
-| Simulator | Algorithms | Visualizes |
+## Verification — what was actually run
+| Check | Result | Where |
 |---|---|---|
-| 🕒 **CPU Scheduling** | FCFS · SJF · Round Robin · Priority | Gantt chart, waiting/turnaround time |
-| 📄 **Page Replacement** | FIFO · LRU · Optimal | Frame table, page faults |
-| 🏦 **Banker's / Deadlock** | Safety algorithm, resource graphs | Safe sequence, deadlock cycles |
-| 💽 **Disk Scheduling** | FCFS · SCAN · C‑SCAN · SSTF | Seek path, total head movement |
-| 🧱 **Paging & Segmentation** | Address translation | Logical → physical mapping |
-| 🏭 **Producer–Consumer** | Bounded buffer, semaphores | Buffer state over time |
-| 🍝 **Dining Philosophers** | Deadlock-avoidance strategies | Fork contention, wait states |
-| 🧵 **Thread Lifecycle** | State machine | New → Ready → Running → Blocked → Terminated |
+| Backend logic tests (RAG, grounding, simulators vs textbook values, sandbox security, LLM stream filter) | **77 pass** | `python scripts/verify.py` (no Docker needed) |
+| Training pipeline tests (each preprocessing stage, split leakage, dataset format, metrics, label masking) | **13 pass** | same command |
+| Retrieval benchmark (40 questions + 5 off-topic probes) | Recall@5 **1.00**, MRR **0.988**, nDCG@5 **0.991**, Hit@1 **0.975**, 0 false abstentions, 4/5 off-topic declined | Knowledge → Evaluation |
+| Frontend strict TypeScript check + server-render of every screen with real simulator output | **clean, 28/28** | run during development |
+| **Not run in the build environment** (no network, Docker or GPU there) | API layer with a live database, `docker compose up`, `next build`, dense/rerank models, real LLM output, **model training** | run `docker compose run --rm api pytest -q tests`, `npm run build`, and the training steps yourself |
 
-</div>
+Be aware of the limits: the benchmark was written together with the corpus, so it is a regression check rather than an unseen
+test (every retrieval variant, even BM25 alone, scores near the ceiling on it — see `docs/evaluation.md`). Off-topic detection is a
+heuristic (4 of 5 probes). The API tests exist and compile but were not executable where this was assembled.
 
-#### Example — CPU Scheduling Engine Flow
+## Fine-tuning (original dataset, preprocessed)
+`training/` builds an original instruction dataset (corpus-derived answers, simulator-computed worked problems, quiz explanations,
+abstention examples), applies a 9-stage preprocessing pipeline, and provides QLoRA training, GGUF export, an Ollama Modelfile and a
+comparison script. **No trained weights are included** (no GPU was available); until you train one the app uses the stock model.
+Details and the Colab notebook: `training/README.md`.
 
-```mermaid
-flowchart LR
-    A[Process Queue Input] --> B{Algorithm?}
-    B -->|FCFS| C[Sequential Order]
-    B -->|SJF| D[Shortest Burst First]
-    B -->|Round Robin| E[Time-Quantum Rotation]
-    B -->|Priority| F[Priority Sort]
-    C --> G[Compute Waiting / Turnaround Time]
-    D --> G
-    E --> G
-    F --> G
-    G --> H[Render Gantt Chart]
-    H --> I[📊 Analytics → Mastery Score]
-```
+## Configuration (`.env`)
+`LLM_MODEL` (default `qwen3:14b`; set `ostutor-qwen3` after fine-tuning) · `LLM_BASE_URL` (Ollama or any OpenAI-compatible server) ·
+`EMBEDDING_MODEL`, `RERANKER_MODEL` · `RAG_MIN_COVERAGE` (abstention threshold) · `JWT_SECRET` (**change it** before sharing) ·
+`CORS_ORIGINS`, `MAX_CODE_SECONDS`. See `.env.example`.
 
-#### Example — Dining Philosophers Deadlock Flow
+## Adding your own material
+Sign in as faculty → **Knowledge → Sources** → drop a PDF/DOCX/PPTX/TXT/MD. Headings become citable sections. Indexing runs in the
+background; the tutor uses the new material as soon as it finishes.
 
-```mermaid
-stateDiagram-v2
-    [*] --> Thinking
-    Thinking --> Hungry: Wants to eat
-    Hungry --> PickLeftFork: Left fork free
-    Hungry --> Waiting: Left fork busy
-    PickLeftFork --> PickRightFork: Right fork free
-    PickLeftFork --> Waiting: Right fork busy
-    PickRightFork --> Eating
-    Eating --> Thinking: Release both forks
-    Waiting --> Hungry: Retry / avoidance strategy
-```
+## Troubleshooting
+* **“Model offline / missing”** pill: start Ollama and `ollama pull qwen3:14b` (or set `LLM_MODEL` to a model you have).
+* **Keyword search instead of Hybrid**: the embedding model is still downloading (first start only) or could not be fetched — see Knowledge → System.
+* **Port in use**: change the left side of `ports:` in `docker-compose.yml`.
+* Logs: `docker compose logs api --tail=100`.
 
----
+## Security notes
+Code labs are sandboxed for a classroom setting (see `backend/app/code_runner.py`), not for hostile multi-tenant hosting: run the stack on a
+trusted machine, change `JWT_SECRET`, and do not expose port 8000 publicly. The in-memory rate limiter is per API process.
 
-## 🔐 Data & Auth Model
-
-```mermaid
-erDiagram
-    USER ||--o{ SESSION : has
-    USER ||--o{ QUIZ_ATTEMPT : takes
-    USER ||--o{ MASTERY_RECORD : owns
-    USER {
-        uuid id
-        string email
-        string role "student|faculty|admin"
-        string password_hash
-    }
-    QUIZ_ATTEMPT ||--o{ ANSWER : contains
-    QUESTION_BANK ||--o{ ANSWER : referenced_by
-    SOURCE_DOC ||--o{ CORPUS_CHUNK : split_into
-    CORPUS_CHUNK ||--o{ TUTOR_CITATION : cited_in
-
-    SESSION {
-        uuid id
-        uuid user_id
-        string jwt_token
-        timestamp expires_at
-    }
-    MASTERY_RECORD {
-        uuid id
-        uuid user_id
-        string topic
-        float score
-    }
-```
-
-**RBAC scopes:**
-
-| Role | Tutor | Simulators | Labs | Quiz/Viva | Source Mgmt | Analytics |
-|---|:---:|:---:|:---:|:---:|:---:|:---:|
-| Student | ✅ | ✅ | ✅ | ✅ | ❌ | Own only |
-| Faculty | ✅ | ✅ | ✅ | ✅ manage | ✅ | Cohort |
-| Admin | ✅ | ✅ | ✅ | ✅ | ✅ | Global |
-
----
-
-## 🗂️ Project Structure
-
-```
-OSTutorLLM/
-├── backend/              # FastAPI app, tutor engine, simulators, auth
-├── frontend/             # Responsive web UI
-├── docs/                 # OS corpus, docs, question bank sources
-├── scripts/              # Setup / maintenance scripts
-├── .github/workflows/    # CI pipelines
-├── docker-compose.yml    # Full stack orchestration
-├── .env.example          # Environment variable template
-├── RUN.bat               # One-click Windows launcher
-├── TEST-ALL.bat          # Full test suite runner
-└── README.md
-```
-
----
-
-## ☁️ Optional External LLM
-
-Want smarter, generative answers on top of the grounded evidence? Point OSTutorLLM at any OpenAI-compatible endpoint (Qwen, Llama, etc.):
-
-```env
-# .env
-LLM_BASE_URL=https://your-endpoint/v1
-LLM_API_KEY=sk-xxxxxxxxxxxxxxxx
-LLM_MODEL=qwen2.5-14b-instruct
-```
-
-The app **continues to work fully offline** if these are left unset — the local grounded tutor is the default, not a fallback bolted on afterward.
-
----
-
-## 🛠️ Operations
-
-**Restart everything (rebuild):**
-```powershell
-docker compose up -d --build
-```
-
-**Stop everything:**
-```powershell
-docker compose down
-```
-
-**Reset volumes (⚠️ wipes DB):**
-```powershell
-docker compose down -v
-```
-
----
-
-## 🚑 Troubleshooting
-
-```mermaid
-flowchart TD
-    A[Something broken?] --> B{Which service?}
-    B -->|API errors| C[docker compose logs api --tail=100]
-    B -->|UI won't load| D[docker compose logs web --tail=100]
-    B -->|Container state unclear| E[docker compose ps]
-    C --> F[Check /health endpoint]
-    D --> F
-    E --> F
-    F --> G[Readable JSON error surfaced in UI —<br/>no endless spinners]
-```
-
-| Symptom | Command | Notes |
-|---|---|---|
-| API not responding | `docker compose logs api --tail=100` | Check DB connection first |
-| Blank / stuck UI | `docker compose logs web --tail=100` | Verify `localhost:8000/health` |
-| Containers won't start | `docker compose ps` | Look for `unhealthy` status |
-| Full reset | `docker compose down -v && docker compose up --build` | Wipes and reseeds corpus + DB |
-
-The API always returns **readable JSON error details**, and the UI surfaces them directly — you're never left staring at an infinite loading state.
-
----
-
-## 🗺️ Roadmap
-
-- [ ] Additional simulators (memory-mapped files, RAID scheduling)
-- [ ] Multi-language corpus support
-- [ ] Faculty-side analytics dashboard v2
-- [ ] Offline LLM quantized model bundling
-- [ ] Mobile-responsive lab terminal
-
----
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome!
-
-1. Fork the repo
-2. Create a feature branch (`git checkout -b feature/amazing-thing`)
-3. Commit your changes
-4. Open a Pull Request
-
----
-
-## 📄 License
-
-Distributed under the **MIT License**. See `LICENSE` for details.
-
-<div align="center">
-
-**Built for Operating Systems students, by people who've debugged one too many deadlocks.**
-
-⭐ Star this repo if OSTutorLLM helped you survive your OS course.
-
-</div>
+## Layout
+`backend/app` API, RAG, simulators, sandbox · `backend/data` corpus, benchmark, question bank · `backend/tests` · `frontend` Next.js UI ·
+`training` dataset + fine-tuning · `docs` architecture and evaluation · `scripts` launchers and `verify.py`.
