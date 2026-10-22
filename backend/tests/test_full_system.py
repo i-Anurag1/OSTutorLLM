@@ -78,7 +78,12 @@ def test_full_system_end_to_end():
     r = client.post('/api/quizzes/generate', headers=auth(student), json={'topic':'Paging','difficulty':'medium','count':2,'kind':'mcq'})
     assert r.status_code == 200, r.text
     assessment = r.json()['assessment']
-    answers = {str(q['id']): q['answer'] for q in assessment}
+    from app.db import SessionLocal
+    from app.models import Question
+    with SessionLocal() as db:
+        ids = [int(q["id"]) for q in assessment]
+        rows = db.query(Question).filter(Question.id.in_(ids)).all()
+        answers = {str(q.id): q.answer for q in rows}
     r = client.post('/api/quizzes/score', headers=auth(student), json={'questions':assessment,'answers':answers,'topic':'Paging'})
     assert r.status_code == 200, r.text
     assert r.json()['score'] == 100
