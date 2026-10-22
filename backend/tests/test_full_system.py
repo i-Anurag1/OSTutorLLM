@@ -1,4 +1,4 @@
-import os, uuid, io
+﻿import os, uuid, io
 from fastapi.testclient import TestClient
 from app.main import app
 
@@ -89,7 +89,7 @@ def test_full_system_end_to_end():
     assert r.json()['score'] == 100
 
     # Evaluation endpoint
-    r = client.post('/api/evaluation/run'); assert r.status_code == 200
+    r = client.post('/api/evaluation/run', headers=auth(faculty)); assert r.status_code == 200
     assert 'aggregate' in r.json()
 
     # Faculty/admin KB and RBAC
@@ -113,3 +113,4 @@ def test_full_system_end_to_end():
     # OpenAPI + docs endpoints
     assert client.get('/openapi.json').status_code == 200
     assert client.get('/docs').status_code == 200
+
