@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     jwt_exp_minutes: int = 720
     llm_base_url: str = "http://host.docker.internal:11434/v1"
     llm_api_key: str = ""
+    llm_required: bool = False
     llm_model: str = "qwen3:14b"
     llm_num_predict: int = 900
     llm_num_ctx: int = 4096

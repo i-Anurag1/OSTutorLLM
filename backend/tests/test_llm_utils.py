@@ -1,8 +1,11 @@
 import json
 import unittest
+from unittest.mock import patch
 
 from app.llm_utils import ThinkFilter, model_listed, parse_ollama_line, parse_openai_line, strip_think
 from app.ratelimit import RateLimiter
+from app import llm
+from app.config import settings
 
 
 class Think(unittest.TestCase):
@@ -52,6 +55,31 @@ class Limiter(unittest.TestCase):
         self.assertFalse(r.allow("a", 2))
         self.assertTrue(r.allow("b", 2))
         self.assertTrue(r.allow("a", 11))
+
+
+class RequiredLLM(unittest.IsolatedAsyncioTestCase):
+    async def test_required_llm_fails_instead_of_silent_fallback(self):
+        old_base, old_required = settings.llm_base_url, settings.llm_required
+        try:
+            settings.llm_base_url = ""
+            settings.llm_required = True
+            with patch.dict("os.environ", {"OSTUTOR_TEST_MODE": "0"}):
+                with self.assertRaises(llm.LLMError):
+                    await llm.generate([{"role": "user", "content": "test"}])
+        finally:
+            settings.llm_base_url, settings.llm_required = old_base, old_required
+
+    async def test_test_mode_keeps_extractive_fallback(self):
+        old_base, old_required = settings.llm_base_url, settings.llm_required
+        try:
+            settings.llm_base_url = ""
+            settings.llm_required = True
+            with patch.dict("os.environ", {"OSTUTOR_TEST_MODE": "1"}):
+                answer, latency = await llm.generate([{"role": "user", "content": "test"}])
+            self.assertIsNone(answer)
+            self.assertEqual(latency, 0.0)
+        finally:
+            settings.llm_base_url, settings.llm_required = old_base, old_required
 
 
 if __name__ == "__main__":

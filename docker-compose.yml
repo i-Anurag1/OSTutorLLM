@@ -5,6 +5,7 @@ x-api-env: &api-env
   CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
   LLM_BASE_URL: ${LLM_BASE_URL:-http://host.docker.internal:11434/v1}
   LLM_API_KEY: ${LLM_API_KEY:-}
+  LLM_REQUIRED: ${LLM_REQUIRED:-1}
   LLM_MODEL: ${LLM_MODEL:-qwen3:14b}
   LLM_NUM_PREDICT: ${LLM_NUM_PREDICT:-900}
   LLM_TIMEOUT: ${LLM_TIMEOUT:-300}

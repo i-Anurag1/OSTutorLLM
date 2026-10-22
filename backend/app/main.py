@@ -102,8 +102,12 @@ def rate_limit(name: str, max_calls: int, window: int):
     return dep
 
 
-login_limit = rate_limit("login", 12, 60)
-labs_limit = rate_limit("labs", 40, 60)
+# Keep production throttles strict. Integration tests make repeated legitimate logins
+# from one in-process TestClient/IP, so grant the deterministic test mode a wider
+# window rather than weakening limits for real deployments.
+_TEST_MODE = __import__("os").getenv("OSTUTOR_TEST_MODE", "0").strip().lower() in {"1", "true", "yes", "on"}
+login_limit = rate_limit("login", 1000 if _TEST_MODE else 12, 60)
+labs_limit = rate_limit("labs", 1000 if _TEST_MODE else 40, 60)
 FACULTY = require_role("faculty", "admin")
 
 
@@ -125,8 +129,10 @@ async def health(db: Session = Depends(get_db)):
     except Exception as exc:
         rag_status = {"ready": False, "error": str(exc)}
     llm_info = await llm.ping()
+    llm_ready = bool(llm_info["reachable"] and llm_info.get("model_available") is not False)
+    llm_mode = "reachable" if llm_ready else ("required-llm-unavailable" if settings.llm_required else "offline-extractive-fallback")
     return {"status": "ok", "version": VERSION, "database": "ok", "rag": rag_status, "rag_ready": rag_status.get("ready", False),
-            "llm": llm_info, "llm_mode": "reachable" if llm_info["reachable"] else "offline-extractive-fallback"}
+            "llm": llm_info, "llm_required": settings.llm_required, "llm_ready": llm_ready, "llm_mode": llm_mode}
 
 
 @app.get("/api/system/status")
@@ -308,7 +314,11 @@ async def tutor_chat(x: ChatIn, u: User = Depends(current_user), db: Session = D
     gen_key = cache_key("gen", {"m": ctx["messages"], "model": settings.llm_model})
     cached = get_json(gen_key)
     started = time.perf_counter()
-    answer, latency = (cached["answer"], 0.0) if cached else await llm.generate(ctx["messages"])
+    try:
+        answer, latency = (cached["answer"], 0.0) if cached else await llm.generate(ctx["messages"])
+    except llm.LLMError as exc:
+        log.warning("required LLM unavailable: %s", exc)
+        raise HTTPException(503, "The configured LLM is unavailable. Start Ollama and verify LLM_MODEL; no extractive fallback was used.") from exc
     if answer:
         if not cached:
             set_json(gen_key, {"answer": answer}, settings.cache_ttl_seconds)
@@ -338,8 +348,12 @@ async def tutor_stream(x: ChatIn, u: User = Depends(current_user), db: Session =
                 async for delta in llm.stream(ctx["messages"]):
                     parts.append(delta)
                     yield _sse("token", {"text": delta})
-            except llm.LLMError:
-                pass
+            except llm.LLMError as exc:
+                test_mode = __import__("os").getenv("OSTUTOR_TEST_MODE", "0").strip().lower() in {"1", "true", "yes", "on"}
+                if settings.llm_required and not test_mode:
+                    log.warning("required LLM stream unavailable: %s", exc)
+                    yield _sse("error", {"detail": "The configured LLM is unavailable. Start Ollama and verify LLM_MODEL; no extractive fallback was used."})
+                    return
             answer = "".join(parts).strip()
             if not answer:
                 mode, answer = "extractive", _extractive(ctx)
@@ -673,7 +687,10 @@ async def evaluate(limit: int = 10, u: User = Depends(FACULTY)):
         res = rag.search(item["question"], k=5)
         hits = res["hits"]
         messages = tutor.build_messages(item["question"], hits, "exam", "medium")
-        answer, latency = await llm.generate(messages)
+        try:
+            answer, latency = await llm.generate(messages)
+        except llm.LLMError as exc:
+            raise HTTPException(503, "The configured LLM is unavailable; evaluation was stopped rather than switching models.") from exc
         mode = "llm"
         if not answer:
             mode, (answer, _) = "extractive", extractive_answer(item["question"], hits)

@@ -35,6 +35,7 @@ jobs:
       DATABASE_URL: postgresql+psycopg://ostutor:ostutor@localhost:5432/ostutor
       REDIS_URL: redis://localhost:6379/0
       OSTUTOR_TEST_MODE: "1"
+      LLM_REQUIRED: "0"
       LLM_BASE_URL: ""
     steps:
       - uses: actions/checkout@v4

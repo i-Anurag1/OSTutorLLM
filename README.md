@@ -13,11 +13,11 @@ dashboard, and a retrieval lab that shows exactly what the tutor saw. Runs local
 
 ## Quick start
 1. Install **Docker Desktop** and (recommended) **Ollama** (https://ollama.com/download).
-2. Windows: double-click `RUN.bat`. macOS/Linux: `scripts/start.sh`. (First run pulls the model and builds the images.)
+2. Windows: double-click `RUN.bat`. macOS/Linux: `scripts/start.sh`. The launcher starts/checks Ollama, ensures the configured model exists, sends a real LLM smoke-test request, then builds and starts the app. It stops with an error rather than silently starting in extractive mode when the model is unavailable.
 3. Open **http://localhost:3000** and use a demo account: `student@ostutor.local / Student123!`,
    `faculty@ostutor.local / Faculty123!`, `admin@ostutor.local / Admin123!`.
 
-Without Ollama the app still works: answers are assembled directly from your notes ("extractive" mode, clearly badged).
+Normal launcher mode requires a live configured LLM (`LLM_REQUIRED=1`), so unavailable Ollama produces a clear error instead of a silent extractive answer. Set `LLM_REQUIRED=0` in `.env` only when you deliberately want notes-only extractive mode.
 Retrieval is usable immediately (keyword/BM25); the dense embedding model downloads in the background and upgrades search to
 hybrid without a restart. Check **Knowledge → System** for the live status.
 
@@ -52,7 +52,7 @@ comparison script. **No trained weights are included** (no GPU was available); u
 Details and the Colab notebook: `training/README.md`.
 
 ## Configuration (`.env`)
-`LLM_MODEL` (default `qwen3:14b`; set `ostutor-qwen3` after fine-tuning) · `LLM_BASE_URL` (Ollama or any OpenAI-compatible server) ·
+`LLM_MODEL` (default `qwen3:14b`; set `ostutor-qwen3` after fine-tuning) · `LLM_BASE_URL` (Ollama or any OpenAI-compatible server) · `LLM_REQUIRED` (defaults to `1` in Docker Compose; prevents silent LLM fallback) ·
 `EMBEDDING_MODEL`, `RERANKER_MODEL` · `RAG_MIN_COVERAGE` (abstention threshold) · `JWT_SECRET` (**change it** before sharing) ·
 `CORS_ORIGINS`, `MAX_CODE_SECONDS`. See `.env.example`.
 
@@ -61,7 +61,7 @@ Sign in as faculty → **Knowledge → Sources** → drop a PDF/DOCX/PPTX/TXT/MD
 background; the tutor uses the new material as soon as it finishes.
 
 ## Troubleshooting
-* **“Model offline / missing”** pill: start Ollama and `ollama pull qwen3:14b` (or set `LLM_MODEL` to a model you have).
+* **Model check fails at startup**: start Ollama and `ollama pull qwen3:14b` (or set `LLM_MODEL` to a model you have), then re-run the launcher. Check the configured host URL in `.env`.
 * **Keyword search instead of Hybrid**: the embedding model is still downloading (first start only) or could not be fetched — see Knowledge → System.
 * **Port in use**: change the left side of `ports:` in `docker-compose.yml`.
 * Logs: `docker compose logs api --tail=100`.

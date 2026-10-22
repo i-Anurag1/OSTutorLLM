@@ -48,6 +48,8 @@ async def generate(messages: list[dict], temperature: float | None = None) -> tu
     """Return (answer or None when the model is unreachable, latency in ms)."""
     global last_error
     if not settings.llm_base_url:
+        if settings.llm_required and not _test_mode():
+            raise LLMError("LLM_BASE_URL is not configured while LLM_REQUIRED=1")
         return None, 0.0
     import httpx
 
@@ -64,7 +66,14 @@ async def generate(messages: list[dict], temperature: float | None = None) -> tu
         return (text or None), round((time.perf_counter() - started) * 1000, 2)
     except (httpx.HTTPError, KeyError, IndexError, ValueError, TypeError) as exc:
         last_error = f"{type(exc).__name__}: {str(exc)[:160]}"
+        if settings.llm_required and not _test_mode():
+            raise LLMError(f"Configured LLM is unavailable: {last_error}") from exc
         return None, round((time.perf_counter() - started) * 1000, 2)
+
+
+def _test_mode() -> bool:
+    import os
+    return os.getenv("OSTUTOR_TEST_MODE", "0").strip().lower() in {"1", "true", "yes", "on"}
 
 
 async def stream(messages: list[dict], temperature: float | None = None) -> AsyncIterator[str]:

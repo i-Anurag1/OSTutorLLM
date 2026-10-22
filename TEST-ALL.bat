@@ -8,7 +8,7 @@ docker compose ps
 if errorlevel 1 goto fail
 echo.
 echo [1/3] Backend test-suite inside the API container (unit + API integration)...
-docker compose exec -T api pytest -q tests
+docker compose exec -T -e OSTUTOR_TEST_MODE=1 -e LLM_REQUIRED=0 -e LLM_BASE_URL= api pytest -q tests
 if errorlevel 1 goto fail
 echo.
 echo [2/3] Checking the web UI responds...
